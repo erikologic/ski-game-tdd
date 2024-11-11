@@ -4,11 +4,14 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 // Webpack Configuration
 const config = {
-    entry: ["./src/index.ts"],
+    entry: {
+        oldGame: "./src/oldGame.ts",
+        newGame: "./src/newGame.ts",
+    },
 
     output: {
         path: path.resolve(__dirname, "./dist"),
-        filename: "bundle.js",
+        filename: "[name].bundle.js",
     },
 
     module: {
@@ -31,8 +34,16 @@ const config = {
 
     plugins: [
         new htmlWebpackPlugin({
+            filename: "index.html",
             title: "Ceros Ski",
             template: "src/index.html",
+            chunks: ["oldGame"],
+        }),
+        new htmlWebpackPlugin({
+            filename: "newGame.html",
+            title: "Ceros Ski new",
+            template: "src/index.html",
+            chunks: ["newGame"],
         }),
         new CopyPlugin({
             patterns: [{ from: "img/*", to: "" }],
