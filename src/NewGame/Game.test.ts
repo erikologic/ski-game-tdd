@@ -25,6 +25,9 @@ describe("Game", () => {
         game.sendInput("right");
         game.next();
         expect(game.skier.position).toEqual({ x: 2, y: -1 });
+        // it only sidesteps once
+        game.next();
+        expect(game.skier.position).toEqual({ x: 2, y: -1 });
     });
 
     test("player skier can downfall towards the left side", () => {
@@ -42,6 +45,9 @@ describe("Game", () => {
         game.next();
         expect(game.skier.position).toEqual({ x: -1, y: -1 });
         game.sendInput("left");
+        game.next();
+        expect(game.skier.position).toEqual({ x: -2, y: -1 });
+        // it only sidesteps once
         game.next();
         expect(game.skier.position).toEqual({ x: -2, y: -1 });
     });

@@ -12,6 +12,7 @@ class Skier {
         | "downhill-left"
         | "sidestepping-left"
         | "hit-obstacle";
+    hasSidestepped = false;
 
     constructor() {
         this.position = { x: 0, y: 0 };
@@ -40,14 +41,20 @@ export class Game {
             this.skier.position.x++;
         }
         if (this.skier.state === "sidestepping-right") {
-            this.skier.position.x++; // TODO only side step once when hitting the key
+            if (!this.skier.hasSidestepped) {
+                this.skier.position.x++;
+                this.skier.hasSidestepped = true;
+            }
         }
         if (this.skier.state === "downhill-left") {
             this.skier.position.y--;
             this.skier.position.x--;
         }
         if (this.skier.state === "sidestepping-left") {
-            this.skier.position.x--; // TODO only side step once when hitting the key
+            if (!this.skier.hasSidestepped) {
+                this.skier.position.x--;
+                this.skier.hasSidestepped = true;
+            }
         }
 
         if (this.rock && this.skier.position.x === this.rock.x && this.skier.position.y === this.rock.y) {
@@ -59,6 +66,7 @@ export class Game {
         if (input === "right") {
             if (this.skier.state === "downhill-right" || this.skier.state === "hit-obstacle") {
                 this.skier.state = "sidestepping-right";
+                this.skier.hasSidestepped = false;
                 return;
             }
             this.skier.state = "downhill-right";
@@ -67,6 +75,7 @@ export class Game {
         if (input === "left") {
             if (this.skier.state === "downhill-left" || this.skier.state === "hit-obstacle") {
                 this.skier.state = "sidestepping-left";
+                this.skier.hasSidestepped = false;
                 return;
             }
             this.skier.state = "downhill-left";
