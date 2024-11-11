@@ -1,6 +1,5 @@
 interface GameEngine {
     setAdvanceGameFunction(next: () => void): unknown;
-    nextTick: () => void;
 }
 
 interface GameOptions {
@@ -8,7 +7,7 @@ interface GameOptions {
 }
 
 export class Game {
-    score = 0;
+    score = 1;
 
     constructor(private options: GameOptions) {}
 
@@ -21,6 +20,6 @@ export class Game {
     }
 
     next() {
-        this.score++;
+        this.score = this.score * 2;
     }
 }

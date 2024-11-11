@@ -6,6 +6,7 @@ class MockedGameEngine {
     nextTick() {
         this.next();
     }
+
     setAdvanceGameFunction(next: () => void) {
         this.next = next;
     }
@@ -16,22 +17,18 @@ describe("Game", () => {
     // game has a player controlled ski character
     // game has a rhino character
 
-    test("game has a score that increments as the skier skis further", () => {
+    test("game difficulty increases the longer the skier skis", () => {
         const mockedGameEngine = new MockedGameEngine();
         const game = new Game({ gameEngine: mockedGameEngine });
         game.start();
 
-        const prevScore = game.getScore();
-
-        mockedGameEngine.nextTick();
-
-        const newScore = game.getScore();
-        expect(newScore).toBeGreaterThan(prevScore);
+        [1, 2, 4, 8].map((expectedScore) => {
+            const gotScore = game.getScore();
+            expect(gotScore).toBe(expectedScore);
+            mockedGameEngine.nextTick();
+        });
     });
 });
-
-// game has a score that increments as the skier skis further
-// game difficulty increases the longer the skier skis
 
 // player can hit obstacles
 // rhino can eat player character
