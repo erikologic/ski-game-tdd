@@ -63,30 +63,39 @@ export class Game {
     }
 
     sendInput(input: "right" | "left" | "down") {
-        if (input === "right") {
-            if (this.skier.state === "downhill-right" || this.skier.state === "hit-obstacle") {
-                this.skier.state = "sidestepping-right";
-                this.skier.hasSidestepped = false;
-                return;
-            }
-            this.skier.state = "downhill-right";
-            return;
-        }
-        if (input === "left") {
-            if (this.skier.state === "downhill-left" || this.skier.state === "hit-obstacle") {
+        if (this.skier.state === "hit-obstacle") {
+            if (input === "down") return;
+
+            if (input === "left") {
                 this.skier.state = "sidestepping-left";
-                this.skier.hasSidestepped = false;
-                return;
             }
-            this.skier.state = "downhill-left";
+            if (input === "right") {
+                this.skier.state = "sidestepping-right";
+            }
+            this.skier.hasSidestepped = false;
             return;
         }
 
         if (input === "down") {
-            if (this.skier.state === "hit-obstacle") {
-                return;
-            }
             this.skier.state = "downhill";
+            return;
         }
+
+        const states = [
+            "sidestepping-left",
+            "downhill-left",
+            "downhill",
+            "downhill-right",
+            "sidestepping-right",
+        ] as const;
+        const currentState = this.skier.state;
+        const currentIndex = states.indexOf(currentState);
+        const stateDiff = input === "left" ? -1 : 1;
+        let newStateIndex = currentIndex + stateDiff;
+        if (newStateIndex < 0 || newStateIndex >= states.length) {
+            this.skier.hasSidestepped = false;
+            newStateIndex = currentIndex;
+        }
+        this.skier.state = states[newStateIndex];
     }
 }

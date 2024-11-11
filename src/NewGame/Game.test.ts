@@ -93,6 +93,35 @@ describe("Game", () => {
         expect(game.skier.state).toEqual("downhill");
     });
 
+    test("player can rotate the skier position from left to right", () => {
+        const game = new Game();
+        expect(game.skier.state).toEqual("downhill");
+        game.sendInput("left");
+        game.next();
+        expect(game.skier.state).toEqual("downhill-left");
+        game.sendInput("left");
+        game.next();
+        expect(game.skier.state).toEqual("sidestepping-left");
+        game.sendInput("right");
+        game.next();
+        expect(game.skier.state).toEqual("downhill-left");
+        game.sendInput("right");
+        game.next();
+        expect(game.skier.state).toEqual("downhill");
+        game.sendInput("right");
+        game.next();
+        expect(game.skier.state).toEqual("downhill-right");
+        game.sendInput("right");
+        game.next();
+        expect(game.skier.state).toEqual("sidestepping-right");
+        
+        // down will alway send the skier downhill
+        game.sendInput("down");
+        game.next();
+        expect(game.skier.state).toEqual("downhill");
+
+    });
+
     // game has obstacles: rocks, tree, trees cluster+
     // player can hit obstacles
 
