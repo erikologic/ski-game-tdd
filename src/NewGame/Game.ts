@@ -20,7 +20,7 @@ class Skier {
 }
 
 export class Game {
-    skier: Skier;
+    skier: Skier; // TODO horrible
     rock?: Coordinates;
 
     constructor() {
@@ -40,14 +40,14 @@ export class Game {
             this.skier.position.x++;
         }
         if (this.skier.state === "sidestepping-right") {
-            this.skier.position.x++;
+            this.skier.position.x++; // TODO only side step once when hitting the key
         }
         if (this.skier.state === "downhill-left") {
             this.skier.position.y--;
             this.skier.position.x--;
         }
         if (this.skier.state === "sidestepping-left") {
-            this.skier.position.x--;
+            this.skier.position.x--; // TODO only side step once when hitting the key
         }
 
         if (this.rock && this.skier.position.x === this.rock.x && this.skier.position.y === this.rock.y) {
