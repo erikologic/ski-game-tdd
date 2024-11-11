@@ -7,5 +7,5 @@ import { Game } from "./NewGame/Game";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const game = new Game();
-    game.run();
+    game.start();
 });

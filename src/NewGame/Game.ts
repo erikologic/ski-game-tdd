@@ -1,5 +1,26 @@
+interface GameEngine {
+    setAdvanceGameFunction(next: () => void): unknown;
+    nextTick: () => void;
+}
+
+interface GameOptions {
+    gameEngine: GameEngine;
+}
+
 export class Game {
-    run() {
-        throw new Error("not implemented");
+    score = 0;
+
+    constructor(private options: GameOptions) {}
+
+    getScore(): number {
+        return this.score;
+    }
+
+    start() {
+        this.options.gameEngine.setAdvanceGameFunction(this.next.bind(this));
+    }
+
+    next() {
+        this.score++;
     }
 }
