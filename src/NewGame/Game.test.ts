@@ -1,12 +1,20 @@
 import { Game } from "./Game";
 
 describe("Game", () => {
-    // game has a player controlled ski character
     test("game has a player controlled ski character that moves down", () => {
         const game = new Game();
         expect(game.skier.position).toEqual({ x: 0, y: 0 });
         game.next();
         expect(game.skier.position).toEqual({ x: 0, y: -1 });
+    });
+
+    test("player moves down faster when game time passes", () => {
+        const game = new Game();
+        expect(game.skier.position).toEqual({ x: 0, y: 0 });
+        game.next();
+        expect(game.skier.position.y).toEqual(-1);
+        [...Array(100)].forEach(() => game.next());
+        expect(game.skier.position.y).toEqual(-101);
     });
 
     // game has obstacles: rocks, tree, trees cluster+

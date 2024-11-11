@@ -3,6 +3,8 @@ interface Skier {
 }
 
 export class Game {
+    gameFrame = 1;
+
     skier: Skier;
     constructor() {
         this.skier = {
@@ -11,7 +13,7 @@ export class Game {
     }
 
     next() {
-        this.skier.position.y--;
+        this.skier.position.y -= Math.ceil(this.gameFrame / 100);
     }
 
     start() {
