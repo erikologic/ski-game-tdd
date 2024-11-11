@@ -83,9 +83,19 @@ class Skier {
     }
 }
 
+export class Obstacle {
+    constructor(public position: Coordinates) {
+        this.position = position;
+    }
+
+    checkCollision(entity: { position: Coordinates }) {
+        return this.position.x === entity.position.x && this.position.y === entity.position.y;
+    }
+}
+
 export class Game {
     skier: Skier; // TODO horrible
-    rock?: Coordinates;
+    obstacles: Obstacle[] = [];
 
     constructor() {
         this.skier = new Skier();
@@ -98,7 +108,7 @@ export class Game {
     next() {
         this.skier.move();
 
-        if (this.rock && this.skier.position.x === this.rock.x && this.skier.position.y === this.rock.y) {
+        if (this.obstacles.some((obstacle) => obstacle.checkCollision(this.skier))) {
             this.skier.state = "hit-obstacle";
         }
     }

@@ -1,4 +1,4 @@
-import { Game } from "./Game";
+import { Game, Obstacle } from "./Game";
 
 describe("Game", () => {
     test("game has a player controlled skier character that moves down", () => {
@@ -71,7 +71,7 @@ describe("Game", () => {
          * AND the skier can eventually continue down the hill
          */
         const game = new Game();
-        game.rock = { x: 0, y: -1 };
+        game.obstacles.push(new Obstacle({ x: 0, y: -1 }));
         game.next();
         expect(game.skier.position).toEqual({ x: 0, y: -1 });
         expect(game.skier.state).toEqual("hit-obstacle");
@@ -114,12 +114,11 @@ describe("Game", () => {
         game.sendInput("right");
         game.next();
         expect(game.skier.state).toEqual("sidestepping-right");
-        
+
         // down will alway send the skier downhill
         game.sendInput("down");
         game.next();
         expect(game.skier.state).toEqual("downhill");
-
     });
 
     // game has obstacles: rocks, tree, trees cluster+
