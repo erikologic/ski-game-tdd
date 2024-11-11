@@ -19,6 +19,32 @@ class Skier {
         this.state = "downhill";
     }
 
+    move() {
+        if (this.state === "downhill") {
+            this.position.y--;
+        }
+        if (this.state === "downhill-right") {
+            this.position.y--;
+            this.position.x++;
+        }
+        if (this.state === "sidestepping-right") {
+            if (!this.hasSidestepped) {
+                this.position.x++;
+                this.hasSidestepped = true;
+            }
+        }
+        if (this.state === "downhill-left") {
+            this.position.y--;
+            this.position.x--;
+        }
+        if (this.state === "sidestepping-left") {
+            if (!this.hasSidestepped) {
+                this.position.x--;
+                this.hasSidestepped = true;
+            }
+        }
+    }
+
     receiveInput(input: "right" | "left" | "down") {
         if (this.state === "hit-obstacle") {
             if (input === "down") return;
@@ -70,29 +96,7 @@ export class Game {
     }
 
     next() {
-        if (this.skier.state === "downhill") {
-            this.skier.position.y--;
-        }
-        if (this.skier.state === "downhill-right") {
-            this.skier.position.y--;
-            this.skier.position.x++;
-        }
-        if (this.skier.state === "sidestepping-right") {
-            if (!this.skier.hasSidestepped) {
-                this.skier.position.x++;
-                this.skier.hasSidestepped = true;
-            }
-        }
-        if (this.skier.state === "downhill-left") {
-            this.skier.position.y--;
-            this.skier.position.x--;
-        }
-        if (this.skier.state === "sidestepping-left") {
-            if (!this.skier.hasSidestepped) {
-                this.skier.position.x--;
-                this.skier.hasSidestepped = true;
-            }
-        }
+        this.skier.move();
 
         if (this.rock && this.skier.position.x === this.rock.x && this.skier.position.y === this.rock.y) {
             this.skier.state = "hit-obstacle";
