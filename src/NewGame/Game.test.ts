@@ -35,6 +35,7 @@ describe("Game", () => {
 });
 
 // player can hit obstacles
+// rhino chase player
 // rhino can eat player character
 // player can jump over rocks
 // player cannot jump over trees
