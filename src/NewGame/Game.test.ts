@@ -57,7 +57,19 @@ describe("Game", () => {
         expect(game.skier.position).toEqual({ x: -1, y: -2 });
     });
 
-    // TODO direction state machine
+    test("player can hit a rock", () => {
+        /**
+         * WHEN the skier hits a rock
+         * THEN the skier stops
+         * AND the skier needs to side step out of the obstacle
+         * AND the skier can eventually continue down the hill
+         */
+        const game = new Game();
+        game.rock = { x: 0, y: -1 };
+        game.next();
+        expect(game.skier.position).toEqual({ x: 0, y: -1 });
+        expect(game.skier.state).toEqual("hit-obstacle");
+    });
 
     // game has obstacles: rocks, tree, trees cluster+
     // player can hit obstacles

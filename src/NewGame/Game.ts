@@ -5,16 +5,23 @@ interface Coordinates {
 
 class Skier {
     position: Coordinates;
-    direction: "down" | "down-right" | "side-right" | "down-left" | "side-left";
+    state:
+        | "downhill"
+        | "downhill-right"
+        | "sidestepping-right"
+        | "downhill-left"
+        | "sidestepping-left"
+        | "hit-obstacle";
 
     constructor() {
         this.position = { x: 0, y: 0 };
-        this.direction = "down";
+        this.state = "downhill";
     }
 }
 
 export class Game {
     skier: Skier;
+    rock?: Coordinates;
 
     constructor() {
         this.skier = new Skier();
@@ -25,45 +32,49 @@ export class Game {
     }
 
     next() {
-        if (this.skier.direction === "down") {
+        if (this.skier.state === "downhill") {
             this.skier.position.y--;
         }
-        if (this.skier.direction === "down-right") {
+        if (this.skier.state === "downhill-right") {
             this.skier.position.y--;
             this.skier.position.x++;
         }
-        if (this.skier.direction === "side-right") {
+        if (this.skier.state === "sidestepping-right") {
             this.skier.position.x++;
         }
-        if (this.skier.direction === "down-left") {
+        if (this.skier.state === "downhill-left") {
             this.skier.position.y--;
             this.skier.position.x--;
         }
-        if (this.skier.direction === "side-left") {
+        if (this.skier.state === "sidestepping-left") {
             this.skier.position.x--;
+        }
+
+        if (this.rock && this.skier.position.x === this.rock.x && this.skier.position.y === this.rock.y) {
+            this.skier.state = "hit-obstacle";
         }
     }
 
     sendInput(input: "right" | "left" | "down") {
         if (input === "right") {
-            if (this.skier.direction === "down-right") {
-                this.skier.direction = "side-right";
+            if (this.skier.state === "downhill-right") {
+                this.skier.state = "sidestepping-right";
                 return;
             }
-            this.skier.direction = "down-right";
+            this.skier.state = "downhill-right";
             return;
         }
         if (input === "left") {
-            if (this.skier.direction === "down-left") {
-                this.skier.direction = "side-left";
+            if (this.skier.state === "downhill-left") {
+                this.skier.state = "sidestepping-left";
                 return;
             }
-            this.skier.direction = "down-left";
+            this.skier.state = "downhill-left";
             return;
         }
 
         if (input === "down") {
-            this.skier.direction = "down";
+            this.skier.state = "downhill";
         }
     }
 }
