@@ -4,6 +4,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 // Webpack Configuration
 const config = {
+    devtool: 'inline-source-map',
     entry: {
         oldGame: "./src/oldGame.ts",
         newGame: "./src/newGame.ts",
