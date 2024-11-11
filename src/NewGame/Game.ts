@@ -46,7 +46,7 @@ export class Game {
         }
     }
 
-    sendInput(input: "right" | "left") {
+    sendInput(input: "right" | "left" | "down") {
         if (input === "right") {
             if (this.skier.direction === "down-right") {
                 this.skier.direction = "side-right";
@@ -62,6 +62,10 @@ export class Game {
             }
             this.skier.direction = "down-left";
             return;
+        }
+
+        if (input === "down") {
+            this.skier.direction = "down";
         }
     }
 }
