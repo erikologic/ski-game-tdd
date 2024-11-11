@@ -1,25 +1,20 @@
-interface GameEngine {
-    setAdvanceGameFunction(next: (gameTime: number) => void): unknown;
-}
-
-interface GameOptions {
-    gameEngine: GameEngine;
+interface Skier {
+    position: { x: number; y: number };
 }
 
 export class Game {
-    score = 0;
+    skier: Skier;
+    constructor() {
+        this.skier = {
+            position: { x: 0, y: 0 },
+        };
+    }
 
-    constructor(private options: GameOptions) {}
-
-    getScore(): number {
-        return this.score;
+    next() {
+        this.skier.position.y--;
     }
 
     start() {
-        this.options.gameEngine.setAdvanceGameFunction(this.next.bind(this));
-    }
-
-    next(gameTime: number) {
-        this.score += Math.ceil(gameTime / 100);
+        throw new Error("Method not implemented.");
     }
 }

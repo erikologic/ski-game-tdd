@@ -1,46 +1,29 @@
 import { Game } from "./Game";
 
-class MockedGameEngine {
-    ticks = 0;
-    private next!: (gameTime: number) => void;
-
-    nextTicks(n: number) {
-        [...Array(n)].forEach(() => {
-            this.ticks++;
-            this.next(this.ticks);
-        });
-    }
-
-    setAdvanceGameFunction(next: (gameTime: number) => void) {
-        this.next = next;
-    }
-}
-
 describe("Game", () => {
-    // game has obstacles: rocks, tree, trees cluster+
     // game has a player controlled ski character
-    // game has a rhino character
-
-    test("game difficulty increases the longer the skier skis", () => {
-        const mockedGameEngine = new MockedGameEngine();
-        const game = new Game({ gameEngine: mockedGameEngine });
-        game.start();
-
-        expect(game.getScore()).toEqual(0);
-        mockedGameEngine.nextTicks(1);
-        expect(game.getScore()).toEqual(1);
-        mockedGameEngine.nextTicks(100);
-        expect(game.getScore()).toBeGreaterThan(101);
+    test("game has a player controlled ski character that moves down", () => {
+        const game = new Game();
+        expect(game.skier.position).toEqual({ x: 0, y: 0 });
+        game.next();
+        expect(game.skier.position).toEqual({ x: 0, y: -1 });
     });
+
+    // game has obstacles: rocks, tree, trees cluster+
+    // player can hit obstacles
+
+    // game has a rhino character
+    // rhino chase player
+    // rhino can eat player character
+
+    // player can jump over rocks
+    // player cannot jump over trees
+
+    // Add a score that increments as the skier skis further
+    // Increase the difficulty the longer the skier skis (increase speed, increase obstacle frequency, etc.)
+
+    // Provide a way to reset the game once it's over
+    // Provide a way to pause and resume the game
 });
-
-// player can hit obstacles
-// rhino chase player
-// rhino can eat player character
-// player can jump over rocks
-// player cannot jump over trees
-
-//   Provide a way to reset the game once it's over
-//   Provide a way to pause and resume the game
 
 //   Deploy the game to a server so that we can play it without having to install it locally
