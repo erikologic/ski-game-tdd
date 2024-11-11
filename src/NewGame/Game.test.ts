@@ -1,13 +1,17 @@
 import { Game } from "./Game";
 
 class MockedGameEngine {
-    private next!: () => void;
+    ticks = 0;
+    private next!: (gameTime: number) => void;
 
-    nextTick() {
-        this.next();
+    nextTicks(n: number) {
+        [...Array(n)].forEach(() => {
+            this.ticks++;
+            this.next(this.ticks);
+        });
     }
 
-    setAdvanceGameFunction(next: () => void) {
+    setAdvanceGameFunction(next: (gameTime: number) => void) {
         this.next = next;
     }
 }
@@ -22,11 +26,11 @@ describe("Game", () => {
         const game = new Game({ gameEngine: mockedGameEngine });
         game.start();
 
-        [1, 2, 4, 8].map((expectedScore) => {
-            const gotScore = game.getScore();
-            expect(gotScore).toBe(expectedScore);
-            mockedGameEngine.nextTick();
-        });
+        expect(game.getScore()).toEqual(0);
+        mockedGameEngine.nextTicks(1);
+        expect(game.getScore()).toEqual(1);
+        mockedGameEngine.nextTicks(100);
+        expect(game.getScore()).toBeGreaterThan(101);
     });
 });
 
