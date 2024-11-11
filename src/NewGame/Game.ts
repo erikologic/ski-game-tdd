@@ -5,7 +5,7 @@ interface Coordinates {
 
 class Skier {
     position: Coordinates;
-    direction: "down" | "down-right";
+    direction: "down" | "down-right" | "down-left";
 
     constructor() {
         this.position = { x: 0, y: 0 };
@@ -34,9 +34,20 @@ export class Game {
             this.skier.position.y -= Math.ceil(this.gameFrame / 100);
             this.skier.position.x += Math.ceil(this.gameFrame / 100);
         }
+        if (this.skier.direction === "down-left") {
+            this.skier.position.y -= Math.ceil(this.gameFrame / 100);
+            this.skier.position.x -= Math.ceil(this.gameFrame / 100);
+        }
     }
 
-    sendInput(input: "right") {
-        this.skier.direction = "down-right";
+    sendInput(input: "right" | "left") {
+        if (input === "right") {
+            this.skier.direction = "down-right";
+            return;
+        }
+        if (input === "left") {
+            this.skier.direction = "down-left";
+            return;
+        }
     }
 }
