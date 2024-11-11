@@ -69,6 +69,22 @@ describe("Game", () => {
         game.next();
         expect(game.skier.position).toEqual({ x: 0, y: -1 });
         expect(game.skier.state).toEqual("hit-obstacle");
+
+        // cannot go down anymore
+        game.sendInput("down");
+        game.next();
+        expect(game.skier.position).toEqual({ x: 0, y: -1 });
+        expect(game.skier.state).toEqual("hit-obstacle");
+
+        game.sendInput("left");
+        game.next();
+        expect(game.skier.position).toEqual({ x: -1, y: -1 });
+        expect(game.skier.state).toEqual("sidestepping-left");
+
+        game.sendInput("down");
+        game.next();
+        expect(game.skier.position).toEqual({ x: -1, y: -2 });
+        expect(game.skier.state).toEqual("downhill");
     });
 
     // game has obstacles: rocks, tree, trees cluster+

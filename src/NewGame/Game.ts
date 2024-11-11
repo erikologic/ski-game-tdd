@@ -57,7 +57,7 @@ export class Game {
 
     sendInput(input: "right" | "left" | "down") {
         if (input === "right") {
-            if (this.skier.state === "downhill-right") {
+            if (this.skier.state === "downhill-right" || this.skier.state === "hit-obstacle") {
                 this.skier.state = "sidestepping-right";
                 return;
             }
@@ -65,7 +65,7 @@ export class Game {
             return;
         }
         if (input === "left") {
-            if (this.skier.state === "downhill-left") {
+            if (this.skier.state === "downhill-left" || this.skier.state === "hit-obstacle") {
                 this.skier.state = "sidestepping-left";
                 return;
             }
@@ -74,6 +74,9 @@ export class Game {
         }
 
         if (input === "down") {
+            if (this.skier.state === "hit-obstacle") {
+                return;
+            }
             this.skier.state = "downhill";
         }
     }
