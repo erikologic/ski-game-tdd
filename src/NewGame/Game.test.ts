@@ -8,31 +8,12 @@ describe("Game", () => {
         expect(game.skier.position).toEqual({ x: 0, y: -1 });
     });
 
-    test("player skier moves down faster when game time passes", () => {
-        const game = new Game();
-        expect(game.skier.position).toEqual({ x: 0, y: 0 });
-        game.next();
-        expect(game.skier.position.y).toEqual(-1);
-        [...Array(100)].forEach(() => game.next());
-        expect(game.skier.position.y).toEqual(-101);
-    });
-
     test("player skier can downfall towards the right side", () => {
         const game = new Game();
         expect(game.skier.position).toEqual({ x: 0, y: 0 });
         game.sendInput("right");
         game.next();
         expect(game.skier.position).toEqual({ x: 1, y: -1 });
-    });
-
-    test("player skier can downfall towards the right side faster when game time passes", () => {
-        const game = new Game();
-        expect(game.skier.position).toEqual({ x: 0, y: 0 });
-        game.sendInput("right");
-        game.next();
-        expect(game.skier.position).toEqual({ x: 1, y: -1 });
-        [...Array(100)].forEach(() => game.next());
-        expect(game.skier.position).toEqual({ x: 101, y: -101 });
     });
 
     test("when going further right, the skier stops and moves sideways", () => {
@@ -46,14 +27,12 @@ describe("Game", () => {
         expect(game.skier.position).toEqual({ x: 2, y: -1 });
     });
 
-    test("player skier can downfall towards the left side, going faster when time passes", () => {
+    test("player skier can downfall towards the left side", () => {
         const game = new Game();
         expect(game.skier.position).toEqual({ x: 0, y: 0 });
         game.sendInput("left");
         game.next();
         expect(game.skier.position).toEqual({ x: -1, y: -1 });
-        [...Array(100)].forEach(() => game.next());
-        expect(game.skier.position).toEqual({ x: -101, y: -101 });
     });
 
     test("when going further left, the skier stops and moves sideways", () => {

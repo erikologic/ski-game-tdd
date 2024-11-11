@@ -14,8 +14,6 @@ class Skier {
 }
 
 export class Game {
-    gameFrame = 1;
-
     skier: Skier;
 
     constructor() {
@@ -28,21 +26,21 @@ export class Game {
 
     next() {
         if (this.skier.direction === "down") {
-            this.skier.position.y -= Math.ceil(this.gameFrame / 100);
+            this.skier.position.y--;
         }
         if (this.skier.direction === "down-right") {
-            this.skier.position.y -= Math.ceil(this.gameFrame / 100);
-            this.skier.position.x += Math.ceil(this.gameFrame / 100);
+            this.skier.position.y--;
+            this.skier.position.x++;
         }
         if (this.skier.direction === "side-right") {
-            this.skier.position.x += Math.ceil(this.gameFrame / 100);
+            this.skier.position.x++;
         }
         if (this.skier.direction === "down-left") {
-            this.skier.position.y -= Math.ceil(this.gameFrame / 100);
-            this.skier.position.x -= Math.ceil(this.gameFrame / 100);
+            this.skier.position.y--;
+            this.skier.position.x--;
         }
         if (this.skier.direction === "side-left") {
-            this.skier.position.x -= Math.ceil(this.gameFrame / 100);
+            this.skier.position.x--;
         }
     }
 
