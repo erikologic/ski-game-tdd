@@ -25,6 +25,16 @@ describe("Game", () => {
         expect(game.skier.position).toEqual({ x: 1, y: -1 });
     });
 
+    test("player skier can downfall towards the right side faster when game time passes", () => {
+        const game = new Game();
+        expect(game.skier.position).toEqual({ x: 0, y: 0 });
+        game.sendInput("right");
+        game.next();
+        expect(game.skier.position).toEqual({ x: 1, y: -1 });
+        [...Array(100)].forEach(() => game.next());
+        expect(game.skier.position).toEqual({ x: 101, y: -101 });
+    })
+
     // game has obstacles: rocks, tree, trees cluster+
     // player can hit obstacles
 
