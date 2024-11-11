@@ -1,20 +1,28 @@
 import { Game } from "./Game";
 
 describe("Game", () => {
-    test("game has a player controlled ski character that moves down", () => {
+    test("game has a player controlled skier character that moves down", () => {
         const game = new Game();
         expect(game.skier.position).toEqual({ x: 0, y: 0 });
         game.next();
         expect(game.skier.position).toEqual({ x: 0, y: -1 });
     });
 
-    test("player moves down faster when game time passes", () => {
+    test("player skier moves down faster when game time passes", () => {
         const game = new Game();
         expect(game.skier.position).toEqual({ x: 0, y: 0 });
         game.next();
         expect(game.skier.position.y).toEqual(-1);
         [...Array(100)].forEach(() => game.next());
         expect(game.skier.position.y).toEqual(-101);
+    });
+
+    test("player skier can downfall towards the right side", () => {
+        const game = new Game();
+        expect(game.skier.position).toEqual({ x: 0, y: 0 });
+        game.sendInput("right");
+        game.next();
+        expect(game.skier.position).toEqual({ x: 1, y: -1 });
     });
 
     // game has obstacles: rocks, tree, trees cluster+
