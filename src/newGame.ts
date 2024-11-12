@@ -63,6 +63,21 @@ class Canvas {
     }
 }
 
+class Rhino {
+    position: Position;
+    images: HTMLImageElement[];
+
+    constructor(position: Position, images: HTMLImageElement[]) {
+        this.position = position;
+        this.images = images;
+    }
+
+    getNextFrame(frame: number) {
+        const idx = frame % 4 >= 2 ? 0 : 1;
+        return this.images[idx];
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     // const game = new Game();
     // game.start();
@@ -75,26 +90,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         position: new Position(-100, 0),
         image: await loadSingleImage("tree", "img/tree_1.png"),
     };
-    const rhino = {
-        position: new Position(100, 0),
-        image: [
-            await loadSingleImage("tree", "img/rhino_celebrate_1.png"),
-            await loadSingleImage("tree", "img/rhino_celebrate_2.png"),
-        ],
-    };
+    const rhino = new Rhino(new Position(100, 0), [
+        await loadSingleImage("tree", "img/rhino_celebrate_1.png"),
+        await loadSingleImage("tree", "img/rhino_celebrate_2.png"),
+    ]);
 
     const cameraPosition = { ...player.position };
 
-    for (let i = 0; i < 300; i++) {
+    let frame = 0;
+    while (true) {
+        frame++;
         canvas.clear();
 
         canvas.drawImage(player.image, player.position);
 
         canvas.drawImage(tree.image, tree.position);
 
-        const idx = i % 4 >= 2 ? 0 : 1;
-        const rhinoFrame = rhino.image[idx];
-        canvas.drawImage(rhinoFrame, rhino.position);
+        canvas.drawImage(rhino.getNextFrame(frame), rhino.position);
 
         await wait(100);
         player.position.y += 1;
