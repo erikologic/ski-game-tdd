@@ -22,16 +22,19 @@ async function loadSingleImage(name: string, url: string): Promise<HTMLImageElem
     });
 }
 
-interface Position {
-    x: number;
-    y: number;
+class Position {
+    constructor(public x: number, public y: number) {}
+
+    add(other: Position) {
+        return new Position(this.x + other.x, this.y + other.y);
+    }
 }
 
 class Canvas {
     width: number;
     heigth: number;
 
-    centre: { x: number; y: number };
+    centre: Position;
     ctx: CanvasRenderingContext2D;
 
     constructor() {
@@ -46,10 +49,7 @@ class Canvas {
         canvas.style.height = this.heigth + "px";
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-        this.centre = {
-            x: this.width / 2,
-            y: this.heigth / 2,
-        };
+        this.centre = new Position(this.width / 2, this.heigth / 2);
     }
 
     clear() {
@@ -57,13 +57,9 @@ class Canvas {
     }
 
     drawImage(image: HTMLImageElement, position: Position) {
-        this.ctx.drawImage(
-            image,
-            this.centre.x + position.x - image.width / 2,
-            this.centre.y + position.y - image.height / 2,
-            image.width,
-            image.height
-        );
+        const imageZero = new Position(-image.width / 2, -image.height / 2);
+        const imageCentre = position.add(imageZero).add(this.centre);
+        this.ctx.drawImage(image, imageCentre.x, imageCentre.y, image.width, image.height);
     }
 }
 
@@ -72,15 +68,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     // game.start();
     const canvas = new Canvas();
     const player = {
-        position: { x: 0, y: 0 },
+        position: new Position(0, 0),
         image: await loadSingleImage("skierdown", "img/skier_down.png"),
     };
     const tree = {
-        position: { x: -100, y: 0 },
+        position: new Position(-100, 0),
         image: await loadSingleImage("tree", "img/tree_1.png"),
     };
     const rhino = {
-        position: { x: 100, y: 0 },
+        position: new Position(100, 0),
         image: [
             await loadSingleImage("tree", "img/rhino_celebrate_1.png"),
             await loadSingleImage("tree", "img/rhino_celebrate_2.png"),
@@ -101,5 +97,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         canvas.drawImage(rhinoFrame, rhino.position);
 
         await wait(100);
+        player.position.y += 1;
     }
 });
