@@ -31,28 +31,70 @@ class Canvas {
         this.ctx.clearRect(0, 0, this.width, this.heigth);
     }
 
-    drawImage(image: HTMLImageElement, position: Position) {
+    drawEntity(entity: IEntity) {
+        const image = entity.frame;
+        const position = entity.position;
+
         const imageZero = new Position(-image.width / 2, -image.height / 2);
         const imageCentre = position.add(imageZero).add(this.centre);
+
         this.ctx.drawImage(image, imageCentre.x, imageCentre.y, image.width, image.height);
     }
 }
 
-class Rhino {
+interface IEntity {
+    get position(): Position;
+    get frame(): HTMLImageElement;
+    update(time: number): void;
+}
+
+class Player implements IEntity {
+    speed = 0.02;
+    lastTime = 0;
+    position: Position;
+    frame: HTMLImageElement;
+
+    constructor(assetManager: AssetManager) {
+        this.position = new Position(0, 0);
+        this.frame = assetManager.images["img/skier_down.png"];
+    }
+
+    update(time: number) {
+        const timeDiff = time - this.lastTime;
+        this.lastTime = time;
+        this.position.y += this.speed * timeDiff;
+    }
+}
+
+class Tree implements IEntity {
+    position: Position;
+    frame: HTMLImageElement;
+
+    constructor(assetManager: AssetManager) {
+        this.position = new Position(0, 0);
+        this.frame = assetManager.images["img/tree_1.png"];
+    }
+
+    update(time: number) {}
+}
+
+class Rhino implements IEntity {
     position: Position;
     images: HTMLImageElement[];
+    frame: HTMLImageElement;
 
-    constructor(position: Position, assetManager: AssetManager) {
-        this.position = position;
+    constructor(assetManager: AssetManager) {
+        this.position = new Position(0, 0);
         this.images = [
             assetManager.images["img/rhino_celebrate_1.png"],
             assetManager.images["img/rhino_celebrate_2.png"],
         ];
+        this.frame = this.images[0];
     }
 
-    getImage(frame: number) {
-        const idx = Math.floor(frame / 10) % 2;
-        return this.images[idx];
+    update(time: number) {
+        const frameIndex = Math.floor(time / 200) % 2;
+        this.frame = this.images[frameIndex];
     }
 }
 
@@ -61,28 +103,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     // game.start();
     const canvas = new Canvas();
     const assetManager = await AssetManager.create();
-    const player = {
-        position: new Position(0, 0),
-        image: assetManager.images["img/skier_down.png"],
-    };
-    const tree = {
-        position: new Position(-100, 0),
-        image: assetManager.images["img/tree_1.png"],
-    };
 
-    const rhino = new Rhino(new Position(100, 0), assetManager);
+    const player = new Player(assetManager);
+
+    const tree = new Tree(assetManager);
+    tree.position.x = -100;
+
+    const rhino = new Rhino(assetManager);
+    rhino.position.x = 100;
 
     const cameraPosition = { ...player.position };
 
-    let frame = 0;
-    async function gameLoop() {
-        frame++;
-        player.position.y += 0.2;
+    const entities = [player, tree, rhino];
+
+    async function gameLoop(time: number) {
+        entities.forEach((entity) => entity.update(time));
 
         canvas.clear();
-        canvas.drawImage(player.image, player.position);
-        canvas.drawImage(tree.image, tree.position);
-        canvas.drawImage(rhino.getImage(frame), rhino.position);
+        entities.forEach((entity) => canvas.drawEntity(entity));
 
         requestAnimationFrame(gameLoop);
     }
