@@ -7,18 +7,16 @@ import "../css/game.css";
 
 const SCALE: number = 0.5;
 
-const loadedImages: { [key: string]: HTMLImageElement } = {};
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function loadSingleImage(name: string, url: string): Promise<void> {
-    return new Promise((resolve) => {
+async function loadSingleImage(name: string, url: string): Promise<HTMLImageElement> {
+    return new Promise<HTMLImageElement>((resolve) => {
         const loadedImage = new Image();
         loadedImage.onload = () => {
             loadedImage.width *= SCALE;
             loadedImage.height *= SCALE;
 
-            loadedImages[name] = loadedImage;
-            resolve();
+            resolve(loadedImage);
         };
         loadedImage.src = url;
     });
@@ -38,8 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     canvas.style.height = canvasHeight + "px";
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    await loadSingleImage("skierdown", "img/skier_down.png");
-    await loadSingleImage("tree", "img/tree_1.png");
+    const skierImage = await loadSingleImage("skierdown", "img/skier_down.png");
+    const treeImage = await loadSingleImage("tree", "img/tree_1.png");
 
     const playerPosition = { x: 0, y: 0 };
     const treePosition = { x: -100, y: 0 };
@@ -48,25 +46,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         y: canvasHeight / 2,
     };
     const cameraPosition = { ...playerPosition };
-    const image = loadedImages["skierdown"];
-    const treeImage = loadedImages["tree"];
 
     for (let i = 0; i < 300; i++) {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.drawImage(
-            image,
-            canvasCentre.x + playerPosition.x - cameraPosition.x - image.width / 2,
-            canvasCentre.y + playerPosition.y - cameraPosition.y - image.height / 2,
-            image.width,
-            image.height
+            skierImage,
+            canvasCentre.x + playerPosition.x - cameraPosition.x - skierImage.width / 2,
+            canvasCentre.y + playerPosition.y - cameraPosition.y - skierImage.height / 2,
+            skierImage.width,
+            skierImage.height
         );
 
         ctx.drawImage(
             treeImage,
             canvasCentre.x + treePosition.x - cameraPosition.x - treeImage.width / 2,
             canvasCentre.y + treePosition.y - cameraPosition.y - treeImage.height / 2,
-            image.width,
-            image.height
+            skierImage.width,
+            skierImage.height
         );
         await wait(100);
         playerPosition.y += 2;
