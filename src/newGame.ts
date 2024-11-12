@@ -30,23 +30,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     const canvas = document.getElementById("skiCanvas")! as HTMLCanvasElement; // TODO exclamation mark
     const ctx = canvas.getContext("2d")!; // TODO exclamation mark
 
-    const game_width = window.innerWidth;
-    const game_height = window.innerHeight;
-    canvas.width = game_width * window.devicePixelRatio;
-    canvas.height = game_height * window.devicePixelRatio;
-    canvas.style.width = game_width + "px";
-    canvas.style.height = game_height + "px";
+    const canvasWidth = window.innerWidth;
+    const canvasHeight = window.innerHeight;
+    canvas.width = canvasWidth * window.devicePixelRatio;
+    canvas.height = canvasHeight * window.devicePixelRatio;
+    canvas.style.width = canvasWidth + "px";
+    canvas.style.height = canvasHeight + "px";
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     await loadSingleImage("skierdown", "img/skier_down.png");
+    await loadSingleImage("tree", "img/tree_1.png");
 
-    ctx.clearRect(0, 0, game_width, game_height);
-    ctx.drawImage(loadedImages["skierdown"], 0, 0);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    await wait(2000);
-    ctx.drawImage(loadedImages["skierdown"], 10, 10);
+    const playerPosition = { x: 0, y: 0 };
+    const relativeZero = {
+        x: canvasWidth / 2,
+        y: canvasHeight / 2,
+    };
+    const image = loadedImages["skierdown"];
+    ctx.drawImage(
+        image,
+        relativeZero.x - image.width / 2,
+        relativeZero.y - image.height / 2,
+        image.width,
+        image.height
+    );
 
-    await wait(2000);
-    ctx.clearRect(0, 0, game_width, game_height);
-    ctx.drawImage(loadedImages["skierdown"], 20, 20);
+    const treePosition = { x: -100, y: 0 };
+    const treeImage = loadedImages["tree"];
+    ctx.drawImage(
+        treeImage,
+        relativeZero.x + treePosition.x - treeImage.width / 2,
+        relativeZero.y + treePosition.y - treeImage.height / 2,
+        image.width,
+        image.height
+    );
 });
