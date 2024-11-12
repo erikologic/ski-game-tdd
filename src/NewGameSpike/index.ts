@@ -78,23 +78,41 @@ class Tree implements IEntity {
     update(time: number) {}
 }
 
-class Rhino implements IEntity {
-    position: Position;
+class Animation {
     images: HTMLImageElement[];
-    frame: HTMLImageElement;
+    frameIndex: number = 0;
 
     constructor(assetManager: AssetManager) {
-        this.position = new Position(0, 0);
         this.images = [
             assetManager.images["img/rhino_celebrate_1.png"],
             assetManager.images["img/rhino_celebrate_2.png"],
         ];
-        this.frame = this.images[0];
     }
 
     update(time: number) {
-        const frameIndex = Math.floor(time / 200) % 2;
-        this.frame = this.images[frameIndex];
+        this.frameIndex = Math.floor(time / 200) % this.images.length;
+    }
+
+    get frame() {
+        return this.images[this.frameIndex];
+    }
+}
+
+class Rhino implements IEntity {
+    position: Position;
+    animation: Animation;
+
+    constructor(assetManager: AssetManager) {
+        this.position = new Position(0, 0);
+        this.animation = new Animation(assetManager);
+    }
+
+    update(time: number) {
+        this.animation.update(time);
+    }
+
+    get frame() {
+        return this.animation.frame;
     }
 }
 
