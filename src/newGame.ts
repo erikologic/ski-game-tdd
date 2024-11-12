@@ -22,25 +22,55 @@ async function loadSingleImage(name: string, url: string): Promise<HTMLImageElem
     });
 }
 
+interface Position {
+    x: number;
+    y: number;
+}
+
+class Canvas {
+    width: number;
+    heigth: number;
+
+    centre: { x: number; y: number };
+    ctx: CanvasRenderingContext2D;
+
+    constructor() {
+        const canvas = document.getElementById("skiCanvas")! as HTMLCanvasElement; // TODO exclamation mark
+        this.ctx = canvas.getContext("2d")!; // TODO exclamation mark
+
+        this.width = window.innerWidth;
+        this.heigth = window.innerHeight;
+        canvas.width = this.width * window.devicePixelRatio;
+        canvas.height = this.heigth * window.devicePixelRatio;
+        canvas.style.width = this.width + "px";
+        canvas.style.height = this.heigth + "px";
+        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        this.centre = {
+            x: this.width / 2,
+            y: this.heigth / 2,
+        };
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.width, this.heigth);
+    }
+
+    drawImage(image: HTMLImageElement, position: Position) {
+        this.ctx.drawImage(
+            image,
+            this.centre.x + position.x - image.width / 2,
+            this.centre.y + position.y - image.height / 2,
+            image.width,
+            image.height
+        );
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     // const game = new Game();
     // game.start();
-    const canvas = document.getElementById("skiCanvas")! as HTMLCanvasElement; // TODO exclamation mark
-    const ctx = canvas.getContext("2d")!; // TODO exclamation mark
-
-    const canvasWidth = window.innerWidth;
-    const canvasHeight = window.innerHeight;
-    canvas.width = canvasWidth * window.devicePixelRatio;
-    canvas.height = canvasHeight * window.devicePixelRatio;
-    canvas.style.width = canvasWidth + "px";
-    canvas.style.height = canvasHeight + "px";
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-    const canvasCentre = {
-        x: canvasWidth / 2,
-        y: canvasHeight / 2,
-    };
-
+    const canvas = new Canvas();
     const player = {
         position: { x: 0, y: 0 },
         image: await loadSingleImage("skierdown", "img/skier_down.png"),
@@ -60,38 +90,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cameraPosition = { ...player.position };
 
     for (let i = 0; i < 300; i++) {
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-        ctx.drawImage(
-            player.image,
-            canvasCentre.x + player.position.x - cameraPosition.x - player.image.width / 2,
-            canvasCentre.y + player.position.y - cameraPosition.y - player.image.height / 2,
-            player.image.width,
-            player.image.height
-        );
+        canvas.clear();
 
-        ctx.drawImage(
-            tree.image,
-            canvasCentre.x + tree.position.x - cameraPosition.x - tree.image.width / 2,
-            canvasCentre.y + tree.position.y - cameraPosition.y - tree.image.height / 2,
-            tree.image.width,
-            tree.image.height
-        );
+        canvas.drawImage(player.image, player.position);
+
+        canvas.drawImage(tree.image, tree.position);
 
         const idx = i % 4 >= 2 ? 0 : 1;
-        ctx.drawImage(
-            rhino.image[idx],
-            canvasCentre.x + rhino.position.x - cameraPosition.x - rhino.image[idx].width / 2,
-            canvasCentre.y + rhino.position.y - cameraPosition.y - rhino.image[idx].height / 2,
-            rhino.image[idx].width,
-            rhino.image[idx].height
-        );
-        await wait(100);
-        // player.position.y += 2;
-        // cameraPosition.y = player.position.y;
+        const rhinoFrame = rhino.image[idx];
+        canvas.drawImage(rhinoFrame, rhino.position);
 
-        // if (i % 40 > 20) {
-        //     player.position.x += 2;
-        //     cameraPosition.x = player.position.x;
-        // }
+        await wait(100);
     }
 });
