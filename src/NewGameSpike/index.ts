@@ -1,14 +1,9 @@
 // import { Game } from "./NewGame/Game";
 
+import { AssetManager } from "./AssetManager";
+import { Position } from "./Position";
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-class Position {
-    constructor(public x: number, public y: number) {}
-
-    add(other: Position) {
-        return new Position(this.x + other.x, this.y + other.y);
-    }
-}
 
 class Canvas {
     width: number;
@@ -40,51 +35,6 @@ class Canvas {
         const imageZero = new Position(-image.width / 2, -image.height / 2);
         const imageCentre = position.add(imageZero).add(this.centre);
         this.ctx.drawImage(image, imageCentre.x, imageCentre.y, image.width, image.height);
-    }
-}
-
-const IMAGES = [
-    "img/tree_1.png",
-    "img/skier_down.png",
-    "img/rhino_celebrate_1.png",
-    "img/rhino_celebrate_2.png",
-] as const;
-const SCALE: number = 0.5;
-
-class AssetManager {
-    images!: Record<typeof IMAGES[number], HTMLImageElement>;
-
-    // hiding the constructor so to force an async object
-    private constructor() {}
-
-    static async create() {
-        const assetManager = new AssetManager();
-        await assetManager.load();
-        return assetManager;
-    }
-
-    async load() {
-        this.images = Object.fromEntries(
-            await Promise.all(
-                IMAGES.map(async (url) => {
-                    const image = await this.loadSingleImage(url);
-                    return [url, image];
-                })
-            )
-        );
-    }
-
-    private async loadSingleImage(url: string): Promise<HTMLImageElement> {
-        return new Promise<HTMLImageElement>((resolve) => {
-            const loadedImage = new Image();
-            loadedImage.onload = () => {
-                loadedImage.width *= SCALE;
-                loadedImage.height *= SCALE;
-
-                resolve(loadedImage);
-            };
-            loadedImage.src = url;
-        });
     }
 }
 
