@@ -43,31 +43,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const playerPosition = { x: 0, y: 0 };
     const treePosition = { x: -100, y: 0 };
-    const relativeZero = {
+    const canvasCentre = {
         x: canvasWidth / 2,
         y: canvasHeight / 2,
     };
+    const cameraPosition = { ...playerPosition };
     const image = loadedImages["skierdown"];
     const treeImage = loadedImages["tree"];
 
-    while (true) {
+    for (let i = 0; i < 300; i++) {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.drawImage(
             image,
-            relativeZero.x + playerPosition.x - image.width / 2,
-            relativeZero.y + playerPosition.y - image.height / 2,
+            canvasCentre.x + playerPosition.x - cameraPosition.x - image.width / 2,
+            canvasCentre.y + playerPosition.y - cameraPosition.y - image.height / 2,
             image.width,
             image.height
         );
 
         ctx.drawImage(
             treeImage,
-            relativeZero.x + treePosition.x - treeImage.width / 2,
-            relativeZero.y + treePosition.y - treeImage.height / 2,
+            canvasCentre.x + treePosition.x - cameraPosition.x - treeImage.width / 2,
+            canvasCentre.y + treePosition.y - cameraPosition.y - treeImage.height / 2,
             image.width,
             image.height
         );
         await wait(100);
         playerPosition.y += 2;
+        cameraPosition.y = playerPosition.y;
+
+        if (i % 40 > 20) {
+            playerPosition.x += 2;
+            cameraPosition.x = playerPosition.x;
+        }
     }
 });
