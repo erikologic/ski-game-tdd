@@ -41,29 +41,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadSingleImage("skierdown", "img/skier_down.png");
     await loadSingleImage("tree", "img/tree_1.png");
 
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
     const playerPosition = { x: 0, y: 0 };
+    const treePosition = { x: -100, y: 0 };
     const relativeZero = {
         x: canvasWidth / 2,
         y: canvasHeight / 2,
     };
     const image = loadedImages["skierdown"];
-    ctx.drawImage(
-        image,
-        relativeZero.x - image.width / 2,
-        relativeZero.y - image.height / 2,
-        image.width,
-        image.height
-    );
-
-    const treePosition = { x: -100, y: 0 };
     const treeImage = loadedImages["tree"];
-    ctx.drawImage(
-        treeImage,
-        relativeZero.x + treePosition.x - treeImage.width / 2,
-        relativeZero.y + treePosition.y - treeImage.height / 2,
-        image.width,
-        image.height
-    );
+
+    while (true) {
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.drawImage(
+            image,
+            relativeZero.x + playerPosition.x - image.width / 2,
+            relativeZero.y + playerPosition.y - image.height / 2,
+            image.width,
+            image.height
+        );
+
+        ctx.drawImage(
+            treeImage,
+            relativeZero.x + treePosition.x - treeImage.width / 2,
+            relativeZero.y + treePosition.y - treeImage.height / 2,
+            image.width,
+            image.height
+        );
+        await wait(100);
+        playerPosition.y += 2;
+    }
 });
