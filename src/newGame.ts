@@ -72,7 +72,7 @@ class Rhino {
         this.images = images;
     }
 
-    getNextFrame(frame: number) {
+    getImage(frame: number) {
         const idx = Math.floor(frame / 10) % 2;
         return this.images[idx];
     }
@@ -99,16 +99,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let frame = 0;
     async function gameLoop() {
-        frame++;
+        player.position.y += 0.2;
+
         canvas.clear();
-
         canvas.drawImage(player.image, player.position);
-
         canvas.drawImage(tree.image, tree.position);
+        canvas.drawImage(rhino.getImage(frame), rhino.position);
 
-        canvas.drawImage(rhino.getNextFrame(frame), rhino.position);
-
-        player.position.y += 1;
+        frame++;
         requestAnimationFrame(gameLoop);
     }
 
