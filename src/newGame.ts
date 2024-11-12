@@ -73,7 +73,7 @@ class Rhino {
     }
 
     getNextFrame(frame: number) {
-        const idx = frame % 4 >= 2 ? 0 : 1;
+        const idx = Math.floor(frame / 10) % 2;
         return this.images[idx];
     }
 }
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cameraPosition = { ...player.position };
 
     let frame = 0;
-    while (true) {
+    async function gameLoop() {
         frame++;
         canvas.clear();
 
@@ -108,7 +108,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         canvas.drawImage(rhino.getNextFrame(frame), rhino.position);
 
-        await wait(100);
         player.position.y += 1;
+        requestAnimationFrame(gameLoop);
     }
+
+    requestAnimationFrame(gameLoop);
 });
