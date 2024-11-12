@@ -7,21 +7,6 @@ import "../css/game.css";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const SCALE: number = 0.5;
-
-async function loadSingleImage(url: string): Promise<HTMLImageElement> {
-    return new Promise<HTMLImageElement>((resolve) => {
-        const loadedImage = new Image();
-        loadedImage.onload = () => {
-            loadedImage.width *= SCALE;
-            loadedImage.height *= SCALE;
-
-            resolve(loadedImage);
-        };
-        loadedImage.src = url;
-    });
-}
-
 class Position {
     constructor(public x: number, public y: number) {}
 
@@ -63,13 +48,61 @@ class Canvas {
     }
 }
 
+const IMAGES = [
+    "img/tree_1.png",
+    "img/skier_down.png",
+    "img/rhino_celebrate_1.png",
+    "img/rhino_celebrate_2.png",
+] as const;
+const SCALE: number = 0.5;
+
+class AssetManager {
+    images!: Record<typeof IMAGES[number], HTMLImageElement>;
+
+    // hiding the constructor so to force an async object
+    private constructor() {}
+
+    static async create() {
+        const assetManager = new AssetManager();
+        await assetManager.load();
+        return assetManager;
+    }
+
+    async load() {
+        this.images = Object.fromEntries(
+            await Promise.all(
+                IMAGES.map(async (url) => {
+                    const image = await this.loadSingleImage(url);
+                    return [url, image];
+                })
+            )
+        );
+    }
+
+    private async loadSingleImage(url: string): Promise<HTMLImageElement> {
+        return new Promise<HTMLImageElement>((resolve) => {
+            const loadedImage = new Image();
+            loadedImage.onload = () => {
+                loadedImage.width *= SCALE;
+                loadedImage.height *= SCALE;
+
+                resolve(loadedImage);
+            };
+            loadedImage.src = url;
+        });
+    }
+}
+
 class Rhino {
     position: Position;
     images: HTMLImageElement[];
 
-    constructor(position: Position, images: HTMLImageElement[]) {
+    constructor(position: Position, assetManager: AssetManager) {
         this.position = position;
-        this.images = images;
+        this.images = [
+            assetManager.images["img/rhino_celebrate_1.png"],
+            assetManager.images["img/rhino_celebrate_2.png"],
+        ];
     }
 
     getImage(frame: number) {
@@ -82,23 +115,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     // const game = new Game();
     // game.start();
     const canvas = new Canvas();
+    const assetManager = await AssetManager.create();
     const player = {
         position: new Position(0, 0),
-        image: await loadSingleImage("img/skier_down.png"),
+        image: assetManager.images["img/skier_down.png"],
     };
     const tree = {
         position: new Position(-100, 0),
-        image: await loadSingleImage("img/tree_1.png"),
+        image: assetManager.images["img/tree_1.png"],
     };
-    const rhino = new Rhino(new Position(100, 0), [
-        await loadSingleImage("img/rhino_celebrate_1.png"),
-        await loadSingleImage("img/rhino_celebrate_2.png"),
-    ]);
+
+    const rhino = new Rhino(new Position(100, 0), assetManager);
 
     const cameraPosition = { ...player.position };
 
     let frame = 0;
     async function gameLoop() {
+        frame++;
         player.position.y += 0.2;
 
         canvas.clear();
@@ -106,7 +139,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         canvas.drawImage(tree.image, tree.position);
         canvas.drawImage(rhino.getImage(frame), rhino.position);
 
-        frame++;
         requestAnimationFrame(gameLoop);
     }
 
