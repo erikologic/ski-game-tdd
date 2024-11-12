@@ -9,7 +9,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const SCALE: number = 0.5;
 
-async function loadSingleImage(name: string, url: string): Promise<HTMLImageElement> {
+async function loadSingleImage(url: string): Promise<HTMLImageElement> {
     return new Promise<HTMLImageElement>((resolve) => {
         const loadedImage = new Image();
         loadedImage.onload = () => {
@@ -84,15 +84,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const canvas = new Canvas();
     const player = {
         position: new Position(0, 0),
-        image: await loadSingleImage("skierdown", "img/skier_down.png"),
+        image: await loadSingleImage("img/skier_down.png"),
     };
     const tree = {
         position: new Position(-100, 0),
-        image: await loadSingleImage("tree", "img/tree_1.png"),
+        image: await loadSingleImage("img/tree_1.png"),
     };
     const rhino = new Rhino(new Position(100, 0), [
-        await loadSingleImage("tree", "img/rhino_celebrate_1.png"),
-        await loadSingleImage("tree", "img/rhino_celebrate_2.png"),
+        await loadSingleImage("img/rhino_celebrate_1.png"),
+        await loadSingleImage("img/rhino_celebrate_2.png"),
     ]);
 
     const cameraPosition = { ...player.position };
