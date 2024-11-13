@@ -5,7 +5,7 @@ import { Animation } from "./Animation";
 import { AssetManager } from "./AssetManager";
 import { Canvas } from "./Canvas";
 import { GameTime } from "./GameTime";
-import { Player } from "./Player";
+import { Player, PlayerCommand } from "./Player";
 import { Position } from "./Position";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -58,14 +58,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const gameTime = new GameTime();
     const player = new Player(assetManager, gameTime);
 
+    const keybindings: Record<string, PlayerCommand> = {
+        Space: "jump",
+        ArrowRight: "turnRight",
+    };
+
     document.addEventListener("keydown", (event) => {
-        const code = event.code;
-        if (code === "Space") {
-            player.do("jump");
-            event.preventDefault();
-        }
-        if (code === "ArrowRight") {
-            player.do("turnRight");
+        const playerAction = keybindings[event.code];
+        if (playerAction) {
+            player.do(playerAction);
             event.preventDefault();
         }
     });

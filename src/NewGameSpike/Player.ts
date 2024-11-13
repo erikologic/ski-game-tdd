@@ -4,7 +4,7 @@ import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
 
-type PlayerCommand = "jump" | "turnRight";
+export type PlayerCommand = "jump" | "turnRight";
 
 interface IEntityState {
     speed: Position;
