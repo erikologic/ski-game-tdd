@@ -4,7 +4,7 @@ import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
 
-export type PlayerCommand = "jump" | "turnRight";
+export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
 interface IEntityState {
     speed: Position;
@@ -56,8 +56,16 @@ class DownRightState implements IEntityState {
     }
 
     do(command: PlayerCommand): IEntityState {
-        if (command === "jump") return new JumpingState(this.assetManager, this.time);
-        return this;
+        switch (command) {
+            case "jump":
+                return new JumpingState(this.assetManager, this.time);
+            case "turnRight":
+                return this; // TODO
+            case "turnLeft":
+                return this; // TODO
+            case "goDown":
+                return new DownhillState(this.assetManager, this.time);
+        }
     }
 }
 
@@ -74,9 +82,16 @@ class DownhillState implements IEntityState {
     }
 
     do(command: PlayerCommand): IEntityState {
-        if (command === "jump") return new JumpingState(this.assetManager, this.time);
-        if (command === "turnRight") return new DownRightState(this.assetManager, this.time);
-        return this;
+        switch (command) {
+            case "jump":
+                return new JumpingState(this.assetManager, this.time);
+            case "turnRight":
+                return new DownRightState(this.assetManager, this.time);
+            case "turnLeft":
+                return this; // TODO
+            case "goDown":
+                return this;
+        }
     }
 }
 
@@ -93,6 +108,8 @@ export class Player implements IEntity {
         this.keybindings = {
             Space: "jump",
             ArrowRight: "turnRight",
+            ArrowLeft: "turnLeft",
+            ArrowDown: "goDown",
         };
     }
 
