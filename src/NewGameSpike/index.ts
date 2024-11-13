@@ -58,6 +58,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const gameTime = new GameTime();
     const player = new Player(assetManager, gameTime);
 
+    document.addEventListener("keydown", (event) => {
+        const code = event.code;
+        if (code === "Space") {
+            player.do("jump");
+            event.preventDefault();
+        }
+        if (code === "ArrowRight") {
+            player.do("turnRight");
+            event.preventDefault();
+        }
+    });
+
     const tree = new Tree(assetManager);
     tree.position.x = -100;
 
@@ -68,17 +80,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const entities = [player, tree, rhino];
 
-
     async function next(time: number) {
         gameTime.update(time);
-
-        if (time > 2000 && time < 2050) {
-            player.do("jump");
-        }
-
-        if (time > 4000 && time < 4050) {
-            player.do("turnRight");
-        }
 
         entities.forEach((entity) => entity.next());
 
