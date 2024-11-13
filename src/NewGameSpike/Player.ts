@@ -2,21 +2,22 @@ import { IEntity } from ".";
 import { AssetManager } from "./AssetManager";
 import { Position } from "./Position";
 import { Animation } from "./Animation";
+import { GameTime } from "./GameTime";
 
 type PlayerCommand = "jump" | "turnRight";
 
 interface IEntityState {
-    speed: number;
-    nextState(time: number): IEntityState;
+    speed: Position;
+    nextState(): IEntityState;
     animation: Animation;
     do(command: PlayerCommand): IEntityState;
 }
 
 class JumpingState implements IEntityState {
-    speed = 0.015;
+    speed = new Position(0, 1);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager) {
+    constructor(private assetManager: AssetManager, private time: GameTime) {
         this.animation = new Animation(
             [
                 assetManager.images["img/skier_jump_1.png"],
@@ -29,11 +30,11 @@ class JumpingState implements IEntityState {
         );
     }
 
-    nextState(time: number) {
+    nextState() {
         if (this.animation.complete) {
-            return new DownhillState(this.assetManager);
+            return new DownhillState(this.assetManager, this.time);
         }
-        this.animation.update(time);
+        this.animation.update(this.time);
         return this;
     }
 
@@ -43,38 +44,38 @@ class JumpingState implements IEntityState {
 }
 
 class DownRightState implements IEntityState {
-    speed = 0.02;
+    speed = new Position(1, 1);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager) {
+    constructor(private assetManager: AssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_right_down.png"]]);
     }
 
-    nextState(time: number) {
+    nextState() {
         return this;
     }
 
     do(command: PlayerCommand): IEntityState {
-        if (command === "jump") return new JumpingState(this.assetManager);
+        if (command === "jump") return new JumpingState(this.assetManager, this.time);
         return this;
     }
 }
 
 class DownhillState implements IEntityState {
-    speed = 0.03;
+    speed = new Position(0, 1);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager) {
+    constructor(private assetManager: AssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
     }
 
-    nextState(time: number) {
+    nextState() {
         return this;
     }
 
     do(command: PlayerCommand): IEntityState {
-        if (command === "jump") return new JumpingState(this.assetManager);
-        if (command === "turnRight") return new DownRightState(this.assetManager);
+        if (command === "jump") return new JumpingState(this.assetManager, this.time);
+        if (command === "turnRight") return new DownRightState(this.assetManager, this.time);
         return this;
     }
 }
@@ -85,21 +86,18 @@ export class Player implements IEntity {
     assetManager: AssetManager;
     state: IEntityState;
 
-    constructor(assetManager: AssetManager) {
+    constructor(assetManager: AssetManager, private time: GameTime) {
         this.assetManager = assetManager;
-        this.state = new DownhillState(assetManager);
+        this.state = new DownhillState(assetManager, time);
     }
 
     do(action: PlayerCommand) {
         this.state = this.state.do(action);
     }
 
-    next(time: number) {
-        const timeDiff = time - this.lastTime;
-        this.lastTime = time;
-
-        this.state = this.state.nextState(time);
-        this.position.y += this.state.speed * timeDiff;
+    next() {
+        this.state = this.state.nextState();
+        this.position = this.position.add(this.state.speed);
     }
 
     get frame() {

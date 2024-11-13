@@ -1,8 +1,10 @@
 // import { Game } from "./NewGame/Game";
 
+import { Game } from "../Core/Game";
 import { Animation } from "./Animation";
 import { AssetManager } from "./AssetManager";
 import { Canvas } from "./Canvas";
+import { GameTime } from "./GameTime";
 import { Player } from "./Player";
 import { Position } from "./Position";
 
@@ -11,7 +13,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export interface IEntity {
     get position(): Position;
     get frame(): HTMLImageElement;
-    next(time: number): void;
+    next(): void;
 }
 
 class Tree implements IEntity {
@@ -23,14 +25,14 @@ class Tree implements IEntity {
         this.frame = assetManager.images["img/tree_1.png"];
     }
 
-    next(time: number) {}
+    next() {}
 }
 
 class Rhino implements IEntity {
     position: Position;
     animation: Animation;
 
-    constructor(assetManager: AssetManager) {
+    constructor(assetManager: AssetManager, private time: GameTime) {
         this.position = new Position(0, 0);
         this.animation = new Animation([
             assetManager.images["img/rhino_celebrate_1.png"],
@@ -38,8 +40,8 @@ class Rhino implements IEntity {
         ]);
     }
 
-    next(time: number) {
-        this.animation.update(time);
+    next() {
+        this.animation.update(this.time);
     }
 
     get frame() {
@@ -53,19 +55,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     const canvas = new Canvas();
     const assetManager = await AssetManager.create();
 
-    const player = new Player(assetManager);
+    const gameTime = new GameTime();
+    const player = new Player(assetManager, gameTime);
 
     const tree = new Tree(assetManager);
     tree.position.x = -100;
 
-    const rhino = new Rhino(assetManager);
+    const rhino = new Rhino(assetManager, gameTime);
     rhino.position.x = 100;
 
     canvas.camera.follow(player);
 
     const entities = [player, tree, rhino];
 
+
     async function next(time: number) {
+        gameTime.update(time);
+
         if (time > 2000 && time < 2050) {
             player.do("jump");
         }
@@ -74,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             player.do("turnRight");
         }
 
-        entities.forEach((entity) => entity.next(time));
+        entities.forEach((entity) => entity.next());
 
         canvas.camera.next();
         canvas.clear();
