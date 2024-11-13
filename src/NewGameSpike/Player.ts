@@ -69,6 +69,32 @@ class DownRightState implements IEntityState {
     }
 }
 
+class SideLeftState implements IEntityState {
+    speed = new Position(-1, 0);
+    animation: Animation;
+
+    constructor(private assetManager: AssetManager, private time: GameTime) {
+        this.animation = new Animation([assetManager.images["img/skier_left.png"]]);
+    }
+
+    nextState() {
+        return this;
+    }
+
+    do(command: PlayerCommand): IEntityState {
+        switch (command) {
+            case "jump":
+                return new JumpingState(this.assetManager, this.time);
+            case "turnRight":
+                return new DownRightState(this.assetManager, this.time);
+            case "turnLeft":
+                return this; // TODO
+            case "goDown":
+                return new DownhillState(this.assetManager, this.time);
+        }
+    }
+}
+
 class DownLeftState implements IEntityState {
     speed = new Position(-1, 1);
     animation: Animation;
@@ -88,7 +114,7 @@ class DownLeftState implements IEntityState {
             case "turnRight":
                 return this; // TODO
             case "turnLeft":
-                return this; // TODO
+                return new SideLeftState(this.assetManager, this.time);
             case "goDown":
                 return new DownhillState(this.assetManager, this.time);
         }
