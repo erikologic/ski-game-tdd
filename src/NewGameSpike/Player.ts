@@ -6,6 +6,11 @@ import { GameTime } from "./GameTime";
 
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
+const DOWNHILL_SPEED = 4;
+const DIAGONAL_SPEED = DOWNHILL_SPEED * 0.7071;
+const JUMP_SPEED = DOWNHILL_SPEED * 0.7;
+const SIDE_SPEED = DOWNHILL_SPEED * 0.5;
+
 interface IEntityState {
     nextState(): IEntityState;
     animation: Animation;
@@ -14,7 +19,7 @@ interface IEntityState {
 }
 
 class JumpingState implements IEntityState {
-    private movement = new Position(0, 0.7);
+    private movement = new Position(0, JUMP_SPEED);
     animation: Animation;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
@@ -48,7 +53,7 @@ class JumpingState implements IEntityState {
 }
 
 class SideRightState implements IEntityState {
-    private movement = new Position(3, 0);
+    private movement = new Position(SIDE_SPEED, 0);
     animation: Animation;
     hasMovedOnce = false;
 
@@ -83,7 +88,7 @@ class SideRightState implements IEntityState {
 }
 
 class DownRightState implements IEntityState {
-    private movement = new Position(1, 1);
+    private movement = new Position(DIAGONAL_SPEED, DIAGONAL_SPEED);
     animation: Animation;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
@@ -113,7 +118,7 @@ class DownRightState implements IEntityState {
 }
 
 class SideLeftState implements IEntityState {
-    movement = new Position(-3, 0);
+    private movement = new Position(-SIDE_SPEED, 0);
     animation: Animation;
     hasMovedOnce = false;
 
@@ -148,7 +153,7 @@ class SideLeftState implements IEntityState {
 }
 
 class DownLeftState implements IEntityState {
-    private movement = new Position(-1, 1);
+    private movement = new Position(-DIAGONAL_SPEED, DIAGONAL_SPEED);
     animation: Animation;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
@@ -178,7 +183,7 @@ class DownLeftState implements IEntityState {
 }
 
 class DownhillState implements IEntityState {
-    private movement = new Position(0, 1);
+    private movement = new Position(0, DOWNHILL_SPEED);
     animation: Animation;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
