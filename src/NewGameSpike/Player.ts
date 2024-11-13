@@ -1,8 +1,9 @@
-import { IEntity } from ".";
+import { IEntity } from "./IEntity";
 import { IAssetManager } from "./AssetManager";
 import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
+import { Rect } from "./Rect";
 
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
@@ -212,6 +213,35 @@ class DownhillState implements IEntityState {
     }
 }
 
+class CrashState implements IEntityState {
+    animation: Animation;
+
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        this.animation = new Animation([assetManager.images["img/skier_crash.png"]]);
+    }
+
+    nextState(): IEntityState {
+        return this;
+    }
+
+    do(command: PlayerCommand): IEntityState {
+        switch (command) {
+            case "jump":
+                return this;
+            case "goDown":
+                return this;
+            case "turnRight":
+                return new SideRightState(this.assetManager, this.time);
+            case "turnLeft":
+                return new SideLeftState(this.assetManager, this.time);
+        }
+    }
+
+    updatePosition(position: Position): Position {
+        return position;
+    }
+}
+
 export class Player implements IEntity {
     lastTime = 0;
     position = new Position(0, 0);
@@ -222,12 +252,17 @@ export class Player implements IEntity {
     constructor(assetManager: IAssetManager, private time: GameTime) {
         this.assetManager = assetManager;
         this.state = new DownhillState(assetManager, time);
+
         this.keybindings = {
             Space: "jump",
             ArrowRight: "turnRight",
             ArrowLeft: "turnLeft",
             ArrowDown: "goDown",
         };
+    }
+
+    collidedWith(otherEntity: IEntity): void {
+        this.state = new CrashState(this.assetManager, this.time);
     }
 
     do(action: PlayerCommand) {
@@ -237,6 +272,10 @@ export class Player implements IEntity {
     next() {
         this.state = this.state.nextState();
         this.position = this.state.updatePosition(this.position);
+    }
+
+    get areaCovered(): Rect {
+        return new Rect(this.position, this.frame);
     }
 
     get frame() {

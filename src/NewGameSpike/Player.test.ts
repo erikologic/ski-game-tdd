@@ -1,10 +1,14 @@
+import { EntityManager } from "./EntityManager";
 import { IMAGES } from "./AssetManager";
 import { GameTime } from "./GameTime";
 import { Player } from "./Player";
+import { Tree } from "./Tree";
 
 const createImage = (url: string) => {
     const image = new Image();
     image.alt = url;
+    image.width = 5;
+    image.height = 5;
     return image;
 };
 
@@ -186,6 +190,69 @@ describe("Player", () => {
             gameTime.gameFrame++;
             player.next();
         }
+        expect(player.frame.alt).toEqual("img/skier_down.png");
+    });
+
+    test("hitting a tree", () => {
+        const gameTime = new GameTime();
+
+        const player = new Player(assetManager, gameTime);
+
+        // GIVEN a tree in front of the skier
+        const tree = new Tree(assetManager);
+        tree.position.y = 7;
+
+        const entityManager = new EntityManager([player, tree]);
+        // WHEN the skier goes downhill
+        gameTime.gameFrame++;
+        entityManager.next();
+        expect(player.position.y).toBe(4);
+
+        // THEN the skier will hit the tree
+        expect(player.frame.alt).toEqual("img/skier_crash.png");
+
+        // AND the skier will not move anymore
+        gameTime.gameFrame++;
+        entityManager.next();
+        expect(player.position.y).toBe(4);
+
+        // AND the skier cannot go downhill anymore
+        gameTime.gameFrame++;
+        player.handleInput("ArrowDown");
+        entityManager.next();
+        expect(player.frame.alt).toEqual("img/skier_crash.png");
+
+        // AND the skier cannot jump anymore
+        gameTime.gameFrame++;
+        player.handleInput("Space");
+        entityManager.next();
+        expect(player.frame.alt).toEqual("img/skier_crash.png");
+
+        // AND the skier needs to go left until exiting the obstacle
+        gameTime.gameFrame++;
+        player.handleInput("ArrowLeft");
+        entityManager.next();
+        expect(player.frame.alt).toEqual("img/skier_crash.png");
+
+        gameTime.gameFrame++;
+        player.handleInput("ArrowDown");
+        entityManager.next();
+        expect(player.frame.alt).toEqual("img/skier_crash.png");
+
+        gameTime.gameFrame++;
+        player.handleInput("ArrowLeft");
+        entityManager.next();
+
+        gameTime.gameFrame++;
+        player.handleInput("ArrowLeft");
+        entityManager.next();
+
+        expect(player.frame.alt).toEqual("img/skier_left.png");
+
+        // AND can finally go downhill again
+        gameTime.gameFrame++;
+        player.handleInput("ArrowDown");
+        entityManager.next();
         expect(player.frame.alt).toEqual("img/skier_down.png");
     });
 });

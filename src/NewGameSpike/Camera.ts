@@ -1,4 +1,4 @@
-import { IEntity } from ".";
+import { IEntity } from "./IEntity";
 import { Position } from "./Position";
 
 export class Camera {

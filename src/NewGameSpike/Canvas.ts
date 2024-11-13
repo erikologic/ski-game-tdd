@@ -1,4 +1,4 @@
-import { IEntity } from ".";
+import { IEntity } from "./IEntity";
 import { Camera } from "./Camera";
 import { Position } from "./Position";
 
