@@ -14,13 +14,6 @@ export interface IEntity {
     next(time: number): void;
 }
 
-export interface IEntityState {
-    speed: number;
-    nextState(time: number): IEntityState;
-    animation: Animation;
-    do(command: "jump"): IEntityState;
-}
-
 class Tree implements IEntity {
     position: Position;
     frame: HTMLImageElement;
@@ -75,6 +68,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function next(time: number) {
         if (time > 2000 && time < 2050) {
             player.do("jump");
+        }
+
+        if (time > 4000 && time < 4050) {
+            player.do("turnRight");
         }
 
         entities.forEach((entity) => entity.next(time));

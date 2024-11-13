@@ -9,6 +9,7 @@ export class AssetManager {
         "img/skier_jump_3.png",
         "img/skier_jump_4.png",
         "img/skier_jump_5.png",
+        "img/skier_right_down.png"
     ] as const;
     static SCALE: number = 0.5;
 
