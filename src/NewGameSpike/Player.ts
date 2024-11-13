@@ -7,14 +7,14 @@ import { GameTime } from "./GameTime";
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
 interface IEntityState {
-    speed: Position;
     nextState(): IEntityState;
     animation: Animation;
     do(command: PlayerCommand): IEntityState;
+    updatePosition(position: Position): Position;
 }
 
 class JumpingState implements IEntityState {
-    speed = new Position(0, 1);
+    private movement = new Position(0, 0.7);
     animation: Animation;
 
     constructor(private assetManager: AssetManager, private time: GameTime) {
@@ -30,7 +30,7 @@ class JumpingState implements IEntityState {
         );
     }
 
-    nextState() {
+    nextState(): IEntityState {
         if (this.animation.complete) {
             return new DownhillState(this.assetManager, this.time);
         }
@@ -41,17 +41,21 @@ class JumpingState implements IEntityState {
     do(action: PlayerCommand): IEntityState {
         return this;
     }
+
+    updatePosition(position: Position): Position {
+        return position.add(this.movement);
+    }
 }
 
 class DownRightState implements IEntityState {
-    speed = new Position(1, 1);
+    private movement = new Position(1, 1);
     animation: Animation;
 
     constructor(private assetManager: AssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_right_down.png"]]);
     }
 
-    nextState() {
+    nextState(): IEntityState {
         return this;
     }
 
@@ -62,22 +66,27 @@ class DownRightState implements IEntityState {
             case "turnRight":
                 return this; // TODO
             case "turnLeft":
-                return this; // TODO
+                return new DownhillState(this.assetManager, this.time);
             case "goDown":
                 return new DownhillState(this.assetManager, this.time);
         }
     }
+
+    updatePosition(position: Position): Position {
+        return position.add(this.movement);
+    }
 }
 
 class SideLeftState implements IEntityState {
-    speed = new Position(-1, 0);
+    movement = new Position(-3, 0);
     animation: Animation;
+    hasMovedOnce = false;
 
     constructor(private assetManager: AssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_left.png"]]);
     }
 
-    nextState() {
+    nextState(): IEntityState {
         return this;
     }
 
@@ -86,50 +95,62 @@ class SideLeftState implements IEntityState {
             case "jump":
                 return new JumpingState(this.assetManager, this.time);
             case "turnRight":
-                return new DownRightState(this.assetManager, this.time);
-            case "turnLeft":
-                return this; // TODO
-            case "goDown":
-                return new DownhillState(this.assetManager, this.time);
-        }
-    }
-}
-
-class DownLeftState implements IEntityState {
-    speed = new Position(-1, 1);
-    animation: Animation;
-
-    constructor(private assetManager: AssetManager, private time: GameTime) {
-        this.animation = new Animation([assetManager.images["img/skier_left_down.png"]]);
-    }
-
-    nextState() {
-        return this;
-    }
-
-    do(command: PlayerCommand): IEntityState {
-        switch (command) {
-            case "jump":
-                return new JumpingState(this.assetManager, this.time);
-            case "turnRight":
-                return this; // TODO
+                return new DownLeftState(this.assetManager, this.time);
             case "turnLeft":
                 return new SideLeftState(this.assetManager, this.time);
             case "goDown":
                 return new DownhillState(this.assetManager, this.time);
         }
     }
+
+    updatePosition(position: Position): Position {
+        if (!this.hasMovedOnce) {
+            this.hasMovedOnce = true;
+            return position.add(this.movement);
+        }
+        return position;
+    }
+}
+
+class DownLeftState implements IEntityState {
+    private movement = new Position(-1, 1);
+    animation: Animation;
+
+    constructor(private assetManager: AssetManager, private time: GameTime) {
+        this.animation = new Animation([assetManager.images["img/skier_left_down.png"]]);
+    }
+
+    nextState(): IEntityState {
+        return this;
+    }
+
+    do(command: PlayerCommand): IEntityState {
+        switch (command) {
+            case "jump":
+                return new JumpingState(this.assetManager, this.time);
+            case "turnRight":
+                return new DownhillState(this.assetManager, this.time);
+            case "turnLeft":
+                return new SideLeftState(this.assetManager, this.time);
+            case "goDown":
+                return new DownhillState(this.assetManager, this.time);
+        }
+    }
+
+    updatePosition(position: Position): Position {
+        return position.add(this.movement);
+    }
 }
 
 class DownhillState implements IEntityState {
-    speed = new Position(0, 1);
+    private movement = new Position(0, 1);
     animation: Animation;
 
     constructor(private assetManager: AssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
     }
 
-    nextState() {
+    nextState(): IEntityState {
         return this;
     }
 
@@ -144,6 +165,10 @@ class DownhillState implements IEntityState {
             case "goDown":
                 return this;
         }
+    }
+
+    updatePosition(position: Position): Position {
+        return position.add(this.movement);
     }
 }
 
@@ -171,7 +196,7 @@ export class Player implements IEntity {
 
     next() {
         this.state = this.state.nextState();
-        this.position = this.position.add(this.state.speed);
+        this.position = this.state.updatePosition(this.position);
     }
 
     get frame() {
