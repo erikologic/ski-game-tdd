@@ -32,13 +32,16 @@ export class Player implements IEntity {
         }
         this._state = value;
         if (value === "jumping") {
-            this.animation = new Animation([
-                this.assetManager.images["img/skier_jump_1.png"],
-                this.assetManager.images["img/skier_jump_2.png"],
-                this.assetManager.images["img/skier_jump_3.png"],
-                this.assetManager.images["img/skier_jump_4.png"],
-                this.assetManager.images["img/skier_jump_5.png"],
-            ]);
+            this.animation = new Animation(
+                [
+                    this.assetManager.images["img/skier_jump_1.png"],
+                    this.assetManager.images["img/skier_jump_2.png"],
+                    this.assetManager.images["img/skier_jump_3.png"],
+                    this.assetManager.images["img/skier_jump_4.png"],
+                    this.assetManager.images["img/skier_jump_5.png"],
+                ],
+                false
+            );
             this.speed *= 0.5;
         }
         if (value === "downhill") {
@@ -51,7 +54,11 @@ export class Player implements IEntity {
         const timeDiff = time - this.lastTime;
         this.lastTime = time;
 
-        this.animation.update(time);
+        if (this._state === "jumping" && this.animation.complete) {
+            this.state = "downhill";
+        } else {
+            this.animation.update(time);
+        }
         this.position.y += this.speed * timeDiff;
     }
 
@@ -112,13 +119,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const entities = [player, tree, rhino];
 
     async function next(time: number) {
-        if (time > 2000) {
+        if (time > 2000 && time < 2050) {
             player.state = "jumping";
         }
 
-        if (time > 5000) {
-            player.state = "downhill";
-        }
         entities.forEach((entity) => entity.next(time));
 
         canvas.camera.next();
