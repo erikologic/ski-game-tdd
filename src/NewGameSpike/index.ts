@@ -5,12 +5,28 @@ import { Position } from "./Position";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+class Camera {
+    target?: IEntity;
+
+    next() {
+        if (this.target) return (this.position = this.target.position);
+        return this.position;
+    }
+
+    follow(player: Player) {
+        this.target = player;
+    }
+
+    position: Position = new Position(0, 0);
+}
+
 class Canvas {
     width: number;
     heigth: number;
 
     centre: Position;
     ctx: CanvasRenderingContext2D;
+    camera: Camera;
 
     constructor() {
         const canvas = document.getElementById("skiCanvas")! as HTMLCanvasElement; // TODO exclamation mark
@@ -25,6 +41,8 @@ class Canvas {
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
         this.centre = new Position(this.width / 2, this.heigth / 2);
+
+        this.camera = new Camera();
     }
 
     clear() {
@@ -36,7 +54,7 @@ class Canvas {
         const position = entity.position;
 
         const imageZero = new Position(-image.width / 2, -image.height / 2);
-        const imageCentre = position.add(imageZero).add(this.centre);
+        const imageCentre = position.add(imageZero).add(this.centre).minus(this.camera.position);
 
         this.ctx.drawImage(image, imageCentre.x, imageCentre.y, image.width, image.height);
     }
@@ -45,7 +63,7 @@ class Canvas {
 interface IEntity {
     get position(): Position;
     get frame(): HTMLImageElement;
-    update(time: number): void;
+    next(time: number): void;
 }
 
 class Player implements IEntity {
@@ -59,7 +77,7 @@ class Player implements IEntity {
         this.frame = assetManager.images["img/skier_down.png"];
     }
 
-    update(time: number) {
+    next(time: number) {
         const timeDiff = time - this.lastTime;
         this.lastTime = time;
         this.position.y += this.speed * timeDiff;
@@ -75,7 +93,7 @@ class Tree implements IEntity {
         this.frame = assetManager.images["img/tree_1.png"];
     }
 
-    update(time: number) {}
+    next(time: number) {}
 }
 
 class Animation {
@@ -107,7 +125,7 @@ class Rhino implements IEntity {
         this.animation = new Animation(assetManager);
     }
 
-    update(time: number) {
+    next(time: number) {
         this.animation.update(time);
     }
 
@@ -130,18 +148,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const rhino = new Rhino(assetManager);
     rhino.position.x = 100;
 
-    const cameraPosition = { ...player.position };
+    canvas.camera.follow(player);
 
     const entities = [player, tree, rhino];
 
-    async function gameLoop(time: number) {
-        entities.forEach((entity) => entity.update(time));
+    async function next(time: number) {
+        entities.forEach((entity) => entity.next(time));
 
+        canvas.camera.next();
         canvas.clear();
         entities.forEach((entity) => canvas.drawEntity(entity));
 
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(next);
     }
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(next);
 });

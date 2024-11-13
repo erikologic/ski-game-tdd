@@ -4,4 +4,8 @@ export class Position {
     add(other: Position) {
         return new Position(this.x + other.x, this.y + other.y);
     }
+
+    minus(other: Position) {
+        return new Position(this.x - other.x, this.y - other.y);
+    }
 }
