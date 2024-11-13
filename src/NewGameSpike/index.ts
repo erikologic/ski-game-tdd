@@ -16,13 +16,12 @@ export interface IEntity {
 export class Player implements IEntity {
     speed = 0.02;
     lastTime = 0;
-    position: Position;
+    position = new Position(0, 0);
     _state: "downhill" | "jumping" = "downhill";
     assetManager: AssetManager;
     animation: Animation;
 
     constructor(assetManager: AssetManager) {
-        this.position = new Position(0, 0);
         this.assetManager = assetManager;
         this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
     }
