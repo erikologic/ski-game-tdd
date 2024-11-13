@@ -50,23 +50,14 @@ class Rhino implements IEntity {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // const game = new Game();
-    // game.start();
     const canvas = new Canvas();
     const assetManager = await AssetManager.create();
 
     const gameTime = new GameTime();
     const player = new Player(assetManager, gameTime);
 
-    const keybindings: Record<string, PlayerCommand> = {
-        Space: "jump",
-        ArrowRight: "turnRight",
-    };
-
     document.addEventListener("keydown", (event) => {
-        const playerAction = keybindings[event.code];
-        if (playerAction) {
-            player.do(playerAction);
+        if (player.handleInput(event.code)) {
             event.preventDefault();
         }
     });

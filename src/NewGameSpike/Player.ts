@@ -85,10 +85,15 @@ export class Player implements IEntity {
     position = new Position(0, 0);
     assetManager: AssetManager;
     state: IEntityState;
+    keybindings: Record<string, PlayerCommand>;
 
     constructor(assetManager: AssetManager, private time: GameTime) {
         this.assetManager = assetManager;
         this.state = new DownhillState(assetManager, time);
+        this.keybindings = {
+            Space: "jump",
+            ArrowRight: "turnRight",
+        };
     }
 
     do(action: PlayerCommand) {
@@ -102,5 +107,14 @@ export class Player implements IEntity {
 
     get frame() {
         return this.state.animation.frame;
+    }
+
+    handleInput(code: string) {
+        const playerAction = this.keybindings[code];
+        if (playerAction) {
+            this.do(playerAction);
+            return true;
+        }
+        return false;
     }
 }
