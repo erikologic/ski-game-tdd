@@ -1,5 +1,6 @@
 // import { Game } from "./NewGame/Game";
 
+import { Animation } from "./Animation";
 import { AssetManager } from "./AssetManager";
 import { Canvas } from "./Canvas";
 import { Position } from "./Position";
@@ -12,58 +13,18 @@ export interface IEntity {
     next(time: number): void;
 }
 
-class PlayerJumpingAnimation {
-    images: HTMLImageElement[];
-    frameIndex: number = 0;
-
-    constructor(assetManager: AssetManager) {
-        this.images = [
-            assetManager.images["img/skier_jump_1.png"],
-            assetManager.images["img/skier_jump_2.png"],
-            assetManager.images["img/skier_jump_3.png"],
-            assetManager.images["img/skier_jump_4.png"],
-            assetManager.images["img/skier_jump_5.png"],
-        ];
-    }
-
-    update(time: number) {
-        this.frameIndex = Math.floor(time / 200) % this.images.length;
-    }
-
-    get frame() {
-        return this.images[this.frameIndex];
-    }
-}
-
-class PlayerDownhillAnimation {
-    images: HTMLImageElement[];
-    frameIndex: number = 0;
-
-    constructor(assetManager: AssetManager) {
-        this.images = [assetManager.images["img/skier_down.png"]];
-    }
-
-    update(time: number) {
-        this.frameIndex = Math.floor(time / 200) % this.images.length;
-    }
-
-    get frame() {
-        return this.images[this.frameIndex];
-    }
-}
-
 export class Player implements IEntity {
     speed = 0.02;
     lastTime = 0;
     position: Position;
     _state: "downhill" | "jumping" = "downhill";
     assetManager: AssetManager;
-    animation: PlayerDownhillAnimation;
+    animation: Animation;
 
     constructor(assetManager: AssetManager) {
         this.position = new Position(0, 0);
         this.assetManager = assetManager;
-        this.animation = new PlayerDownhillAnimation(assetManager);
+        this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
     }
 
     set state(value: "downhill" | "jumping") {
@@ -72,11 +33,17 @@ export class Player implements IEntity {
         }
         this._state = value;
         if (value === "jumping") {
-            this.animation = new PlayerJumpingAnimation(this.assetManager);
+            this.animation = new Animation([
+                this.assetManager.images["img/skier_jump_1.png"],
+                this.assetManager.images["img/skier_jump_2.png"],
+                this.assetManager.images["img/skier_jump_3.png"],
+                this.assetManager.images["img/skier_jump_4.png"],
+                this.assetManager.images["img/skier_jump_5.png"],
+            ]);
             this.speed *= 0.5;
         }
         if (value === "downhill") {
-            this.animation = new PlayerDownhillAnimation(this.assetManager);
+            this.animation = new Animation([this.assetManager.images["img/skier_down.png"]]);
             this.speed *= 2;
         }
     }
@@ -106,33 +73,16 @@ class Tree implements IEntity {
     next(time: number) {}
 }
 
-class RhinoCelebrateAnimation {
-    images: HTMLImageElement[];
-    frameIndex: number = 0;
-
-    constructor(assetManager: AssetManager) {
-        this.images = [
-            assetManager.images["img/rhino_celebrate_1.png"],
-            assetManager.images["img/rhino_celebrate_2.png"],
-        ];
-    }
-
-    update(time: number) {
-        this.frameIndex = Math.floor(time / 200) % this.images.length;
-    }
-
-    get frame() {
-        return this.images[this.frameIndex];
-    }
-}
-
 class Rhino implements IEntity {
     position: Position;
-    animation: RhinoCelebrateAnimation;
+    animation: Animation;
 
     constructor(assetManager: AssetManager) {
         this.position = new Position(0, 0);
-        this.animation = new RhinoCelebrateAnimation(assetManager);
+        this.animation = new Animation([
+            assetManager.images["img/rhino_celebrate_1.png"],
+            assetManager.images["img/rhino_celebrate_2.png"],
+        ]);
     }
 
     next(time: number) {
