@@ -1,4 +1,4 @@
-import { IEntity, Player } from ".";
+import { IEntity } from ".";
 import { Position } from "./Position";
 
 export class Camera {
@@ -9,8 +9,8 @@ export class Camera {
         return this.position;
     }
 
-    follow(player: Player) {
-        this.target = player;
+    follow(entity: IEntity) {
+        this.target = entity;
     }
 
     position: Position = new Position(0, 0);
