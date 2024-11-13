@@ -1,5 +1,5 @@
 import { IEntity } from ".";
-import { AssetManager } from "./AssetManager";
+import { IAssetManager } from "./AssetManager";
 import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
@@ -17,7 +17,7 @@ class JumpingState implements IEntityState {
     private movement = new Position(0, 0.7);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager, private time: GameTime) {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
         this.animation = new Animation(
             [
                 assetManager.images["img/skier_jump_1.png"],
@@ -52,7 +52,7 @@ class SideRightState implements IEntityState {
     animation: Animation;
     hasMovedOnce = false;
 
-    constructor(private assetManager: AssetManager, private time: GameTime) {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_right.png"]]);
     }
 
@@ -86,7 +86,7 @@ class DownRightState implements IEntityState {
     private movement = new Position(1, 1);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager, private time: GameTime) {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_right_down.png"]]);
     }
 
@@ -117,7 +117,7 @@ class SideLeftState implements IEntityState {
     animation: Animation;
     hasMovedOnce = false;
 
-    constructor(private assetManager: AssetManager, private time: GameTime) {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_left.png"]]);
     }
 
@@ -151,7 +151,7 @@ class DownLeftState implements IEntityState {
     private movement = new Position(-1, 1);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager, private time: GameTime) {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_left_down.png"]]);
     }
 
@@ -181,7 +181,7 @@ class DownhillState implements IEntityState {
     private movement = new Position(0, 1);
     animation: Animation;
 
-    constructor(private assetManager: AssetManager, private time: GameTime) {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
         this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
     }
 
@@ -210,11 +210,11 @@ class DownhillState implements IEntityState {
 export class Player implements IEntity {
     lastTime = 0;
     position = new Position(0, 0);
-    assetManager: AssetManager;
+    assetManager: IAssetManager;
     state: IEntityState;
     keybindings: Record<string, PlayerCommand>;
 
-    constructor(assetManager: AssetManager, private time: GameTime) {
+    constructor(assetManager: IAssetManager, private time: GameTime) {
         this.assetManager = assetManager;
         this.state = new DownhillState(assetManager, time);
         this.keybindings = {

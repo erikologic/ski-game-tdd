@@ -10,14 +10,15 @@ export class Animation {
     constructor(public images: HTMLImageElement[], private isLoop = true) {}
 
     update(time: GameTime) {
-        this.frameIndex = Math.floor(time.gameFrame / Animation.ANIMATION_TO_GAME_FRAME_RATE) % this.images.length;
+        const nextFrame = Math.floor(time.gameFrame / Animation.ANIMATION_TO_GAME_FRAME_RATE) % this.images.length;
+        const isAnimationRestarting = nextFrame < this.frameIndex;
+        if (isAnimationRestarting && !this.isLoop) {
+            this.complete = true;
+        }
+        this.frameIndex = nextFrame;
     }
 
     get frame(): HTMLImageElement {
-        if (!this.isLoop && this.frameIndex === this.images.length - 1) {
-            this.complete = true;
-        }
-
         return this.images[this.frameIndex];
     }
 }
