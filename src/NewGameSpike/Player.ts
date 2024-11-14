@@ -174,39 +174,6 @@ class SideLeftState implements IEntityState {
     }
 }
 
-class DownLeftState implements IEntityState {
-    private movement = new Position(-DIAGONAL_SPEED, DIAGONAL_SPEED);
-    animation: Animation;
-
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.animation = new Animation([assetManager.images["img/skier_left_down.png"]]);
-    }
-
-    nextState(): IEntityState {
-        return this;
-    }
-
-    do(command: PlayerCommand): IEntityState {
-        switch (command) {
-            case "jump":
-                return new JumpingState(this.assetManager, this.time);
-            case "turnRight":
-                return new DownhillState(this.assetManager, this.time);
-            case "turnLeft":
-                return new SideLeftState(this.assetManager, this.time);
-            case "goDown":
-                return new DownhillState(this.assetManager, this.time);
-        }
-    }
-
-    updatePosition(position: Position): Position {
-        return position.add(this.movement);
-    }
-
-    collidedWith(otherEntity: IEntity): IEntityState {
-        return new CrashState(this.assetManager, this.time);
-    }
-}
 
 interface IAnimationManager {
     animation: Animation;
@@ -344,6 +311,46 @@ class DownhillState extends BaseState {
         const animationManager = new DownhillAnimationManager(assetManager);
         const commandManager = new DownhillCommandManager(assetManager, time);
         const positionManager = new ContinuosMovementPositionManager();
+        const collisionManager = new CollisionManager(assetManager, time);
+        const nextStateManager = new SameNextStateManager();
+        super(animationManager, commandManager, positionManager, collisionManager, nextStateManager);
+    }
+}
+
+class DownLeftAnimationManager implements IAnimationManager {
+    animation: Animation;
+
+    constructor(private assetManager: IAssetManager) {
+        this.animation = new Animation([assetManager.images["img/skier_left_down.png"]]);
+    }
+}
+
+class DownLeftCommandManager implements ICommandManager {
+    actions: Record<PlayerCommand, () => IEntityState | undefined>;
+
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        this.actions = {
+            jump: () => new JumpingState(this.assetManager, this.time),
+            goDown: () => undefined,
+            turnRight: () => new DownhillState(this.assetManager, this.time),
+            turnLeft: () => new SideLeftState(this.assetManager, this.time),
+        };
+    }
+    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
+        return this.actions[command]() || currentState;
+    }
+}
+
+class DownLeftContinuosMovementPositionManager implements IPositionManager {
+    updatePosition(state: IEntityState, position: Position): Position {
+        return position.add(new Position(-DIAGONAL_SPEED, DIAGONAL_SPEED));
+    }
+}
+class DownLeftState extends BaseState {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        const animationManager = new DownLeftAnimationManager(assetManager);
+        const commandManager = new DownLeftCommandManager(assetManager, time);
+        const positionManager = new DownLeftContinuosMovementPositionManager();
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
         super(animationManager, commandManager, positionManager, collisionManager, nextStateManager);
