@@ -115,7 +115,7 @@ class DownhillState extends BaseState {
             turnRight: () => new DownRightState(this.assetManager, this.time),
             turnLeft: () => new DownLeftState(this.assetManager, this.time),
         });
-        const positionManager = new ContinuosMovementPositionManager(new Position(0, DOWNHILL_SPEED));
+        const positionManager = new ContinuosMovementPositionManager(time, new Position(0, DOWNHILL_SPEED));
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
         super(frameManager, commandManager, positionManager, collisionManager, nextStateManager);
@@ -131,7 +131,10 @@ class DownLeftState extends BaseState {
             turnRight: () => new DownhillState(this.assetManager, this.time),
             turnLeft: () => new SideLeftState(this.assetManager, this.time),
         });
-        const positionManager = new ContinuosMovementPositionManager(new Position(-DIAGONAL_SPEED, DIAGONAL_SPEED));
+        const positionManager = new ContinuosMovementPositionManager(
+            time,
+            new Position(-DIAGONAL_SPEED, DIAGONAL_SPEED)
+        );
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
         super(frameManager, commandManager, positionManager, collisionManager, nextStateManager);
@@ -163,7 +166,10 @@ class DownRightState extends BaseState {
             turnRight: () => new SideRightState(this.assetManager, this.time),
             turnLeft: () => new DownhillState(this.assetManager, this.time),
         });
-        const positionManager = new ContinuosMovementPositionManager(new Position(DIAGONAL_SPEED, DIAGONAL_SPEED));
+        const positionManager = new ContinuosMovementPositionManager(
+            time,
+            new Position(DIAGONAL_SPEED, DIAGONAL_SPEED)
+        );
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
         super(frameManager, commandManager, positionManager, collisionManager, nextStateManager);
@@ -243,10 +249,13 @@ class DoNothingCommandManager implements ICommandManager {
 }
 
 class ContinuosMovementPositionManager implements IPositionManager {
-    constructor(private movement: Position) {}
+    constructor(private time: GameTime, private movement: Position) {}
 
     updatePosition(state: IEntityState, position: Position): Position {
-        return position.add(this.movement);
+        // speed should double every 60 seconds
+        const gameSeconds = this.time.gameFrame / GameTime.FRAME_PER_SECOND;
+        const speed = Math.pow(2, gameSeconds / 60);
+        return position.add(this.movement.multiply(speed, speed));
     }
 }
 
@@ -265,7 +274,7 @@ class JumpingState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
         const stateAnimationManager = new JumpingStateAnimationManager(assetManager, time);
         const commandManager = new DoNothingCommandManager();
-        const positionManager = new ContinuosMovementPositionManager(new Position(0, JUMP_SPEED));
+        const positionManager = new ContinuosMovementPositionManager(time, new Position(0, JUMP_SPEED));
         const collisionManager = new JumpingCollisionManager(assetManager, time);
         super(stateAnimationManager, commandManager, positionManager, collisionManager, stateAnimationManager);
     }

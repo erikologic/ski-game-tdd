@@ -27,7 +27,7 @@ describe("Player", () => {
         expect(player.position.y).toEqual(0);
         gameTime.gameFrame++;
         player.next();
-        expect(player.position.y).toEqual(4);
+        expect(player.position.y).toBeGreaterThan(0);
 
         expect(player.frame.alt).toEqual("img/skier_down.png");
     });
@@ -42,8 +42,15 @@ describe("Player", () => {
         while (gameTime.gameFrame < 5) {
             gameTime.gameFrame++;
             player.next();
-            expect(player.position.y).toEqual(gameTime.gameFrame * 4);
         }
+        expect(player.position.y).toBeGreaterThan(20);
+        expect(player.position.y).toBeLessThan(25);
+
+        let y1 = player.position.y;
+        gameTime.gameFrame++;
+        player.next();
+        let y2 = player.position.y;
+        let speed = y2 - y1;
 
         // GIVEN the skier receives a jump command
         player.do("jump");
@@ -56,7 +63,7 @@ describe("Player", () => {
         expect(player.frame.alt).toEqual("img/skier_jump_1.png");
 
         // AND the skier will slow down
-        expect(player.position.y).toBe(prevPositionY + 2.8);
+        expect(player.position.y).toBeLessThan(prevPositionY + speed);
     });
 
     test("jump animation", () => {
@@ -115,6 +122,13 @@ describe("Player", () => {
 
         expect(player.position.y).toEqual(0);
 
+        let y1 = player.position.y;
+        gameTime.gameFrame++;
+        player.next();
+        let y2 = player.position.y;
+        let downhillSpeed = y2 - y1;
+
+        let lastPosition = player.position;
         // GIVEN the skier receives a turn right command
         gameTime.gameFrame++;
         player.handleInput("ArrowRight");
@@ -122,31 +136,36 @@ describe("Player", () => {
 
         // THEN the skier goes right downhill
         expect(player.frame.alt).toEqual("img/skier_right_down.png");
-        expect(player.position.y).toBe(2.8284);
-        expect(player.position.x).toBe(2.8284); // speed is different then downhill speed!
+        // speed is different then downhill speed!
+        expect(player.position.y).toBeLessThan(player.position.y + downhillSpeed);
+        // and the skier goes right
+        expect(player.position.x).toBeGreaterThan(lastPosition.x);
 
         // GIVEN the skier receives a turn right command
+        lastPosition = player.position;
         gameTime.gameFrame++;
         player.handleInput("ArrowRight");
         player.next();
 
         // THEN the skier goes right on the side
         expect(player.frame.alt).toEqual("img/skier_right.png");
-        expect(player.position.y).toBe(2.8284);
-        expect(player.position.x).toBe(4.8284);
+        expect(player.position.x).toBeGreaterThan(lastPosition.x);
+        expect(player.position.y).toBe(lastPosition.y);
 
         // AND it stops
+        lastPosition = player.position;
         gameTime.gameFrame++;
         player.next();
-        expect(player.position.y).toBe(2.8284);
-        expect(player.position.x).toBe(4.8284);
+        expect(player.position.x).toBe(lastPosition.x);
+        expect(player.position.y).toBe(lastPosition.y);
 
         // AND pressing right again will make the skier go right again
+        lastPosition = player.position;
         gameTime.gameFrame++;
         player.handleInput("ArrowRight");
         player.next();
-        expect(player.position.y).toBe(2.8284);
-        expect(player.position.x).toBe(6.8284);
+        expect(player.position.x).toBeGreaterThan(lastPosition.x);
+        expect(player.position.y).toBe(lastPosition.y);
 
         // AND pressing left will make the skier go downhill right
         gameTime.gameFrame++;
@@ -213,7 +232,7 @@ describe("Player", () => {
         // WHEN the skier goes downhill
         gameTime.gameFrame++;
         entityManager.next();
-        expect(player.position.y).toBe(4);
+        const y = player.position.y;
 
         // THEN the skier will hit the tree
         expect(player.frame.alt).toEqual("img/skier_crash.png");
@@ -221,7 +240,7 @@ describe("Player", () => {
         // AND the skier will not move anymore
         gameTime.gameFrame++;
         entityManager.next();
-        expect(player.position.y).toBe(4);
+        expect(player.position.y).toBe(y);
 
         // AND the skier cannot go downhill anymore
         gameTime.gameFrame++;
@@ -302,5 +321,29 @@ describe("Player", () => {
 
         // THEN the skier will eventually crash on the rock
         expect(player.frame.alt).toEqual("img/skier_crash.png");
+    });
+
+    test("player go faster over time", () => {
+        const gameTime = new GameTime();
+        const player = new Player(assetManager, gameTime);
+
+        const frameRate = 1000 / GameTime.FRAME_PER_SECOND;
+
+        // GIVEN the skier goes downhill
+        gameTime.gameFrame++;
+        player.next();
+        const y1 = player.position.y;
+
+        gameTime.gameFrame++;
+        player.next();
+        const y2 = player.position.y;
+
+        // THEN the speed is not linear
+        expect(y2 - y1).toBeGreaterThan(y2 / 2);
+
+        gameTime.gameFrame++;
+        player.next();
+        const y3 = player.position.y;
+        expect(y3 - y2).toBeGreaterThan(y3 / 3);
     });
 });

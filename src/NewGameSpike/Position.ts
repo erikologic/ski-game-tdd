@@ -8,4 +8,8 @@ export class Position {
     minus(other: Position) {
         return new Position(this.x - other.x, this.y - other.y);
     }
+
+    multiply(x: number, y: number): Position {
+        return new Position(this.x * x, this.y * y);
+    }
 }
