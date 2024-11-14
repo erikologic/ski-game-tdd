@@ -208,40 +208,6 @@ class DownLeftState implements IEntityState {
     }
 }
 
-class DownhillState implements IEntityState {
-    private movement = new Position(0, DOWNHILL_SPEED);
-    animation: Animation;
-
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
-    }
-
-    nextState(): IEntityState {
-        return this;
-    }
-
-    do(command: PlayerCommand): IEntityState {
-        switch (command) {
-            case "jump":
-                return new JumpingState(this.assetManager, this.time);
-            case "turnRight":
-                return new DownRightState(this.assetManager, this.time);
-            case "turnLeft":
-                return new DownLeftState(this.assetManager, this.time);
-            case "goDown":
-                return this;
-        }
-    }
-
-    updatePosition(position: Position): Position {
-        return position.add(this.movement);
-    }
-
-    collidedWith(otherEntity: IEntity): IEntityState {
-        return new CrashState(this.assetManager, this.time);
-    }
-}
-
 interface IAnimationManager {
     animation: Animation;
 }
@@ -312,7 +278,7 @@ class CrashCommandManager implements ICommandManager {
     }
 }
 
-class DontMovePositionManager implements IPositionManager {
+class StoppedPositionManager implements IPositionManager {
     updatePosition(state: IEntityState, position: Position): Position {
         return position;
     }
@@ -326,7 +292,7 @@ class CollisionManager implements ICollisionManager {
     }
 }
 
-class StillNextStateManager implements INextStateManager {
+class SameNextStateManager implements INextStateManager {
     next(state: IEntityState): IEntityState {
         return state;
     }
@@ -336,9 +302,50 @@ class CrashState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
         const animationManager = new CrashAnimationManager(assetManager);
         const commandManager = new CrashCommandManager(assetManager, time);
-        const positionManager = new DontMovePositionManager();
+        const positionManager = new StoppedPositionManager();
         const collisionManager = new CollisionManager(assetManager, time);
-        const nextStateManager = new StillNextStateManager();
+        const nextStateManager = new SameNextStateManager();
+        super(animationManager, commandManager, positionManager, collisionManager, nextStateManager);
+    }
+}
+
+class DownhillAnimationManager implements IAnimationManager {
+    animation: Animation;
+
+    constructor(private assetManager: IAssetManager) {
+        this.animation = new Animation([assetManager.images["img/skier_down.png"]]);
+    }
+}
+
+class DownhillCommandManager implements ICommandManager {
+    actions: Record<PlayerCommand, () => IEntityState | undefined>;
+
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        this.actions = {
+            jump: () => new JumpingState(this.assetManager, this.time),
+            goDown: () => undefined,
+            turnRight: () => new DownRightState(this.assetManager, this.time),
+            turnLeft: () => new DownLeftState(this.assetManager, this.time),
+        };
+    }
+    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
+        return this.actions[command]() || currentState;
+    }
+}
+
+class ContinuosMovementPositionManager implements IPositionManager {
+    updatePosition(state: IEntityState, position: Position): Position {
+        return position.add(new Position(0, DOWNHILL_SPEED));
+    }
+}
+
+class DownhillState extends BaseState {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        const animationManager = new DownhillAnimationManager(assetManager);
+        const commandManager = new DownhillCommandManager(assetManager, time);
+        const positionManager = new ContinuosMovementPositionManager();
+        const collisionManager = new CollisionManager(assetManager, time);
+        const nextStateManager = new SameNextStateManager();
         super(animationManager, commandManager, positionManager, collisionManager, nextStateManager);
     }
 }
