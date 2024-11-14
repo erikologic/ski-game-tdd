@@ -18,6 +18,7 @@ interface IEntityState {
     animation: Animation;
     do(command: PlayerCommand): IEntityState;
     updatePosition(position: Position): Position;
+    collidedWith(otherEntity: IEntity): IEntityState;
 }
 
 class JumpingState implements IEntityState {
@@ -51,6 +52,13 @@ class JumpingState implements IEntityState {
 
     updatePosition(position: Position): Position {
         return position.add(this.movement);
+    }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        if (otherEntity instanceof Rock) {
+            return this;
+        }
+        return new CrashState(this.assetManager, this.time);
     }
 }
 
@@ -87,6 +95,10 @@ class SideRightState implements IEntityState {
         }
         return position;
     }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return new CrashState(this.assetManager, this.time);
+    }
 }
 
 class DownRightState implements IEntityState {
@@ -116,6 +128,10 @@ class DownRightState implements IEntityState {
 
     updatePosition(position: Position): Position {
         return position.add(this.movement);
+    }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return new CrashState(this.assetManager, this.time);
     }
 }
 
@@ -152,6 +168,10 @@ class SideLeftState implements IEntityState {
         }
         return position;
     }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return new CrashState(this.assetManager, this.time);
+    }
 }
 
 class DownLeftState implements IEntityState {
@@ -181,6 +201,10 @@ class DownLeftState implements IEntityState {
 
     updatePosition(position: Position): Position {
         return position.add(this.movement);
+    }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return new CrashState(this.assetManager, this.time);
     }
 }
 
@@ -212,6 +236,10 @@ class DownhillState implements IEntityState {
     updatePosition(position: Position): Position {
         return position.add(this.movement);
     }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return new CrashState(this.assetManager, this.time);
+    }
 }
 
 class CrashState implements IEntityState {
@@ -241,6 +269,10 @@ class CrashState implements IEntityState {
     updatePosition(position: Position): Position {
         return position;
     }
+
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return this;
+    }
 }
 
 export class Player implements IEntity {
@@ -263,10 +295,7 @@ export class Player implements IEntity {
     }
 
     collidedWith(otherEntity: IEntity): void {
-        if (otherEntity instanceof Rock && this.state instanceof JumpingState) {
-            return;
-        }
-        this.state = new CrashState(this.assetManager, this.time);
+        this.state = this.state.collidedWith(otherEntity);
     }
 
     do(action: PlayerCommand) {
