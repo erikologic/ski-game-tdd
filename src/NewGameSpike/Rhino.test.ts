@@ -19,8 +19,6 @@ const assetManager = {
     >,
 };
 
-const range = (n: number) => Array.from({ length: n }, (_, i) => i);
-
 describe("Rhino", () => {
     test("can chase player", () => {
         const gameTime = new GameTime();
@@ -61,12 +59,15 @@ describe("Rhino", () => {
         let rhinoSpeed = rhinoY2 - rhinoY1;
         expect(rhinoSpeed).toBeGreaterThan(playerSpeed);
 
+        // GIVEN the rhino is close to the player
         while (rhino.frame.alt === "img/rhino_default.png") {
             gameTime.gameFrame++;
             entityManager.next();
         }
 
+        // THEN the rhino eats the player
         expect(rhino.frame.alt).toEqual("img/rhino_eat_1.png");
+        const rhinoEatPosition = rhino.position;
 
         let eatFrame = 0;
         while (eatFrame < 48) {
@@ -92,6 +93,7 @@ describe("Rhino", () => {
             expect(rhino.frame.alt).toEqual("img/rhino_eat_4.png");
         }
 
+        // THEN the rhino celebrates
         let celebrateFrame = -1;
         while (celebrateFrame < 48) {
             celebrateFrame++;
@@ -117,7 +119,11 @@ describe("Rhino", () => {
         entityManager.next();
         expect(rhino.frame.alt).toEqual("img/rhino_celebrate_1.png");
 
-        // AND rhino so far hasn't moved
-        //...
+        // AND rhino hasn't moved since eating
+        expect(rhino.position.y).toEqual(rhinoEatPosition.y);
+    });
+
+    test("chase player left and right", () => {
+        fail("not implemented");
     });
 });

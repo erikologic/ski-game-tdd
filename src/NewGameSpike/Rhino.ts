@@ -4,7 +4,6 @@ import { IEntity } from "./IEntity";
 import { Player } from "./Player";
 import { Position } from "./Position";
 import { Rect } from "./Rect";
-import { IFrameManager, StillFrameManager } from "./StillFrameManager";
 import { Animation } from "./Animation";
 
 // TODO - move these to a shared location
@@ -15,6 +14,14 @@ interface IRhinoState {
     frame: HTMLImageElement;
     updatePosition(position: Position): Position;
     collidedWith(otherEntity: IEntity): IRhinoState;
+}
+
+interface IFrameManager {
+    get frame(): HTMLImageElement;
+}
+
+class StillFrameManager implements IFrameManager {
+    constructor(public frame: HTMLImageElement) {}
 }
 
 interface IPositionManager {
@@ -135,9 +142,10 @@ class CelebratingStateAnimationManager implements IFrameManager, INextStateManag
     animation: Animation;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.animation = new Animation(
-            [assetManager.images["img/rhino_celebrate_1.png"], assetManager.images["img/rhino_celebrate_2.png"]],
-        );
+        this.animation = new Animation([
+            assetManager.images["img/rhino_celebrate_1.png"],
+            assetManager.images["img/rhino_celebrate_2.png"],
+        ]);
     }
 
     get frame(): HTMLImageElement {
@@ -155,11 +163,9 @@ class CelebratingStateAnimationManager implements IFrameManager, INextStateManag
 
 class RhinoCelebrateState extends BaseState {
     constructor(assetManager: IAssetManager, time: GameTime) {
-        // const frameManager = new StillFrameManager(assetManager.images["img/rhino_celebrate_1.png"]);
         const frameStateAnimationManager = new CelebratingStateAnimationManager(assetManager, time);
         const collisionManager = new CollisionManager();
         const positionManager = new StoppedPositionManager();
-        // const nextStateManager = new EatingStateAnimationManager(assetManager, time);
         super(frameStateAnimationManager, positionManager, collisionManager, frameStateAnimationManager);
     }
 }
@@ -210,7 +216,7 @@ export class Rhino implements IEntity {
         return this.state.frame;
     }
 
-    chase(player: IEntity) {
+    chase(entity: IEntity) {
         this.state = new RhinoChaseState(this.assetManager, this.time);
     }
 }

@@ -32,6 +32,9 @@ export class Canvas {
     }
 
     drawEntity(entity: IEntity) {
+        if (!entity.frame) {
+            return;
+        }
         const image = entity.frame;
         const position = entity.position;
 

@@ -4,7 +4,7 @@ import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
 import { Rect } from "./Rect";
-import { StillFrameManager, IFrameManager } from "./StillFrameManager";
+import { Rhino } from "./Rhino";
 
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
@@ -13,9 +13,18 @@ const DIAGONAL_SPEED = DOWNHILL_SPEED * 0.7071;
 const JUMP_SPEED = DOWNHILL_SPEED * 0.7;
 const SIDE_SPEED = DOWNHILL_SPEED * 0.5;
 
+interface IFrameManager {
+    get frame(): HTMLImageElement | undefined;
+}
+
+class StillFrameManager implements IFrameManager {
+    constructor(public frame: HTMLImageElement) {}
+}
+
+
 interface IEntityState {
     nextState(): IEntityState;
-    frame: HTMLImageElement;
+    frame: HTMLImageElement | undefined;
     do(command: PlayerCommand): IEntityState;
     updatePosition(position: Position): Position;
     collidedWith(otherEntity: IEntity): IEntityState;
@@ -46,7 +55,7 @@ class BaseState implements IEntityState {
         private nextStateManager: INextStateManager
     ) {}
 
-    get frame(): HTMLImageElement {
+    get frame(): HTMLImageElement | undefined {
         return this.frameManager.frame;
     }
     do(command: PlayerCommand): IEntityState {
@@ -272,6 +281,29 @@ class JumpingState extends BaseState {
     }
 }
 
+class NoCollisionManager implements ICollisionManager {
+    collidedWith(state: IEntityState, otherEntity: IEntity): IEntityState {
+        return state;
+    }
+}
+
+class NoFrameManager implements IFrameManager {
+    get frame(): undefined {
+        return undefined;
+    }
+}
+
+class DeadState extends BaseState {
+    constructor() {
+        const frameManager = new NoFrameManager();
+        const commandManager = new DoNothingCommandManager();
+        const positionManager = new StoppedPositionManager();
+        const collisionManager = new NoCollisionManager();
+        const nextStateManager = new SameNextStateManager();
+        super(frameManager, commandManager, positionManager, collisionManager, nextStateManager);
+    }
+}
+
 export class Player implements IEntity {
     lastTime = 0;
     position = new Position(0, 0);
@@ -293,6 +325,9 @@ export class Player implements IEntity {
     }
 
     collidedWith(otherEntity: IEntity): void {
+        if (otherEntity instanceof Rhino) {
+            this.state = new DeadState();
+        }
         this.state = this.state.collidedWith(otherEntity);
     }
 
@@ -306,11 +341,14 @@ export class Player implements IEntity {
     }
 
     get areaCovered(): Rect {
+        if (!this.frame) {
+            return new Rect(this.position, { width: 1, height: 1 });
+        }
         return new Rect(this.position, this.frame);
     }
 
     get frame() {
-        return this.state.frame; // TODO: this is a bit of a leaky abstraction
+        return this.state.frame;
     }
 
     handleInput(code: string) {
