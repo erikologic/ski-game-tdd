@@ -8,6 +8,7 @@ import { Animation } from "./Animation";
 export class Rhino implements IEntity {
     position: Position;
     animation: Animation;
+    height = 0;
 
     constructor(assetManager: AssetManager, private time: GameTime) {
         this.position = new Position(0, 0);

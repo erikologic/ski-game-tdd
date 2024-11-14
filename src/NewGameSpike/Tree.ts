@@ -6,6 +6,7 @@ import { Rect } from "./Rect";
 export class Tree implements IEntity {
     position: Position;
     frame: HTMLImageElement;
+    height = 200;
 
     constructor(assetManager: IAssetManager) {
         this.position = new Position(0, 0);

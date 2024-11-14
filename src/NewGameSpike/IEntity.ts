@@ -7,4 +7,5 @@ export interface IEntity {
     get position(): Position;
     get frame(): HTMLImageElement;
     next(): void;
+    get height(): number;
 }

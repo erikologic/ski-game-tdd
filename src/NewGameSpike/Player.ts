@@ -55,10 +55,10 @@ class JumpingState implements IEntityState {
     }
 
     collidedWith(otherEntity: IEntity): IEntityState {
-        if (otherEntity instanceof Rock) {
-            return this;
+        if (otherEntity.height > 100) {
+            return new CrashState(this.assetManager, this.time);
         }
-        return new CrashState(this.assetManager, this.time);
+        return this;
     }
 }
 
@@ -281,6 +281,7 @@ export class Player implements IEntity {
     assetManager: IAssetManager;
     state: IEntityState;
     keybindings: Record<string, PlayerCommand>;
+    height = 0;
 
     constructor(assetManager: IAssetManager, private time: GameTime) {
         this.assetManager = assetManager;
