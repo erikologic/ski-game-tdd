@@ -154,26 +154,15 @@ class SideLeftState extends BaseState {
     }
 }
 
-class DownRightCommandManager implements ICommandManager {
-    actions: Record<PlayerCommand, () => IEntityState | undefined>;
-
+class DownRightState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.actions = {
+        const frameManager = new StillFrameManager(assetManager.images["img/skier_right_down.png"]);
+        const commandManager = new SimpleCommandManager({
             jump: () => new JumpingState(this.assetManager, this.time),
             goDown: () => new DownhillState(this.assetManager, this.time),
             turnRight: () => new SideRightState(this.assetManager, this.time),
             turnLeft: () => new DownhillState(this.assetManager, this.time),
-        };
-    }
-    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
-        return this.actions[command]() || currentState;
-    }
-}
-
-class DownRightState extends BaseState {
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        const frameManager = new StillFrameManager(assetManager.images["img/skier_right_down.png"]);
-        const commandManager = new DownRightCommandManager(assetManager, time);
+        });
         const positionManager = new ContinuosMovementPositionManager(new Position(DIAGONAL_SPEED, DIAGONAL_SPEED));
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
