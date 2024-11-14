@@ -242,36 +242,36 @@ class DownhillState implements IEntityState {
     }
 }
 
+function noOp(this: IEntityState, ...any: any): IEntityState {
+    return this;
+}
+
+function dontMove(this: IEntityState, position: Position): Position {
+    return position;
+}
+
 class CrashState implements IEntityState {
+    nextState: () => IEntityState;
     animation: Animation;
+    updatePosition: (position: Position) => Position;
+    collidedWith: (otherEntity: IEntity) => IEntityState;
+    actions: Record<PlayerCommand, () => IEntityState>;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
+        this.collidedWith = noOp.bind(this);
+        this.nextState = noOp.bind(this);
+        this.updatePosition = dontMove.bind(this);
         this.animation = new Animation([assetManager.images["img/skier_crash.png"]]);
-    }
-
-    nextState(): IEntityState {
-        return this;
+        this.actions = {
+            jump: () => this,
+            goDown: () => this,
+            turnRight: () => new SideRightState(this.assetManager, this.time),
+            turnLeft: () => new SideLeftState(this.assetManager, this.time),
+        };
     }
 
     do(command: PlayerCommand): IEntityState {
-        switch (command) {
-            case "jump":
-                return this;
-            case "goDown":
-                return this;
-            case "turnRight":
-                return new SideRightState(this.assetManager, this.time);
-            case "turnLeft":
-                return new SideLeftState(this.assetManager, this.time);
-        }
-    }
-
-    updatePosition(position: Position): Position {
-        return position;
-    }
-
-    collidedWith(otherEntity: IEntity): IEntityState {
-        return this;
+        return this.actions[command]();
     }
 }
 
