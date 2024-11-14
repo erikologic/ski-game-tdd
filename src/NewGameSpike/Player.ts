@@ -242,36 +242,104 @@ class DownhillState implements IEntityState {
     }
 }
 
-function noOp(this: IEntityState, ...any: any): IEntityState {
-    return this;
-}
-
-function dontMove(this: IEntityState, position: Position): Position {
-    return position;
-}
-
-class CrashState implements IEntityState {
-    nextState: () => IEntityState;
+interface IAnimationManager {
     animation: Animation;
-    updatePosition: (position: Position) => Position;
-    collidedWith: (otherEntity: IEntity) => IEntityState;
-    actions: Record<PlayerCommand, () => IEntityState>;
+}
+
+interface ICommandManager {
+    do(state: IEntityState, command: PlayerCommand): IEntityState;
+}
+
+interface IPositionManager {
+    updatePosition(state: IEntityState, position: Position): Position;
+}
+
+interface ICollisionManager {
+    collidedWith(state: IEntityState, otherEntity: IEntity): IEntityState;
+}
+
+interface INextStateManager {
+    next(state: IEntityState): IEntityState;
+}
+
+class BaseState implements IEntityState {
+    constructor(
+        private animationManager: IAnimationManager,
+        private commandManager: ICommandManager,
+        private positionManager: IPositionManager,
+        private collisionManager: ICollisionManager,
+        private nextStateManager: INextStateManager
+    ) {}
+
+    get animation(): Animation {
+        return this.animationManager.animation;
+    }
+    do(command: PlayerCommand): IEntityState {
+        return this.commandManager.do(this, command);
+    }
+    updatePosition(position: Position): Position {
+        return this.positionManager.updatePosition(this, position);
+    }
+    collidedWith(otherEntity: IEntity): IEntityState {
+        return this.collisionManager.collidedWith(this, otherEntity);
+    }
+    nextState(): IEntityState {
+        return this.nextStateManager.next(this);
+    }
+}
+
+class CrashAnimationManager implements IAnimationManager {
+    animation: Animation;
+
+    constructor(private assetManager: IAssetManager) {
+        this.animation = new Animation([assetManager.images["img/skier_crash.png"]]);
+    }
+}
+
+class CrashCommandManager implements ICommandManager {
+    actions: Record<PlayerCommand, () => IEntityState | undefined>;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.collidedWith = noOp.bind(this);
-        this.nextState = noOp.bind(this);
-        this.updatePosition = dontMove.bind(this);
-        this.animation = new Animation([assetManager.images["img/skier_crash.png"]]);
         this.actions = {
-            jump: () => this,
-            goDown: () => this,
+            jump: () => undefined,
+            goDown: () => undefined,
             turnRight: () => new SideRightState(this.assetManager, this.time),
             turnLeft: () => new SideLeftState(this.assetManager, this.time),
         };
     }
+    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
+        return this.actions[command]() || currentState;
+    }
+}
 
-    do(command: PlayerCommand): IEntityState {
-        return this.actions[command]();
+class DontMovePositionManager implements IPositionManager {
+    updatePosition(state: IEntityState, position: Position): Position {
+        return position;
+    }
+}
+
+class CollisionManager implements ICollisionManager {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {}
+
+    collidedWith(state: IEntityState, otherEntity: IEntity): IEntityState {
+        return new CrashState(this.assetManager, this.time);
+    }
+}
+
+class StillNextStateManager implements INextStateManager {
+    next(state: IEntityState): IEntityState {
+        return state;
+    }
+}
+
+class CrashState extends BaseState {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        const animationManager = new CrashAnimationManager(assetManager);
+        const commandManager = new CrashCommandManager(assetManager, time);
+        const positionManager = new DontMovePositionManager();
+        const collisionManager = new CollisionManager(assetManager, time);
+        const nextStateManager = new StillNextStateManager();
+        super(animationManager, commandManager, positionManager, collisionManager, nextStateManager);
     }
 }
 
@@ -313,7 +381,7 @@ export class Player implements IEntity {
     }
 
     get frame() {
-        return this.state.animation.frame;
+        return this.state.animation.frame; // TODO: this is a bit of a leaky abstraction
     }
 
     handleInput(code: string) {
