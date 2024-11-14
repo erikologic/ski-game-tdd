@@ -227,19 +227,6 @@ class SideLeftCommandManager implements ICommandManager {
     }
 }
 
-// class SideRightPositionManager implements IPositionManager {
-//     hasMovedOnce = false;
-//     movement = new Position(SIDE_SPEED, 0);
-
-//     updatePosition(state: IEntityState, position: Position): Position {
-//         if (!this.hasMovedOnce) {
-//             this.hasMovedOnce = true;
-//             return position.add(this.movement);
-//         }
-//         return position;
-//     }
-// }
-
 class SideLeftPositionManager implements IPositionManager {
     hasMovedOnce = false;
     movement = new Position(-SIDE_SPEED, 0);
@@ -304,45 +291,6 @@ class DownRightState extends BaseState {
     }
 }
 
-// class SideRightState implements IEntityState {
-//     private movement = new Position(SIDE_SPEED, 0);
-//     animation: Animation;
-//     hasMovedOnce = false;
-
-//     constructor(private assetManager: IAssetManager, private time: GameTime) {
-//         this.animation = new Animation([assetManager.images["img/skier_right.png"]]);
-//     }
-
-//     nextState(): IEntityState {
-//         return this;
-//     }
-
-//     do(command: PlayerCommand): IEntityState {
-//         switch (command) {
-//             case "jump":
-//                 return new JumpingState(this.assetManager, this.time);
-//             case "turnRight":
-//                 return new SideRightState(this.assetManager, this.time);
-//             case "turnLeft":
-//                 return new DownRightState(this.assetManager, this.time);
-//             case "goDown":
-//                 return new DownhillState(this.assetManager, this.time);
-//         }
-//     }
-
-//     updatePosition(position: Position): Position {
-//         if (!this.hasMovedOnce) {
-//             this.hasMovedOnce = true;
-//             return position.add(this.movement);
-//         }
-//         return position;
-//     }
-
-//     collidedWith(otherEntity: IEntity): IEntityState {
-//         return new CrashState(this.assetManager, this.time);
-//     }
-// }
-
 class SideRightAnimationManager implements IAnimationManager {
     animation: Animation;
 
@@ -390,8 +338,8 @@ class SideRightState extends BaseState {
         super(animationManager, commandManager, positionManager, collisionManager, nextStateManager);
     }
 }
-class JumpingState implements IEntityState {
-    private movement = new Position(0, JUMP_SPEED);
+
+class JumpingStateAnimationManager implements IAnimationManager, INextStateManager {
     animation: Animation;
 
     constructor(private assetManager: IAssetManager, private time: GameTime) {
@@ -407,27 +355,47 @@ class JumpingState implements IEntityState {
         );
     }
 
-    nextState(): IEntityState {
+    next(currentState: IEntityState): IEntityState {
         if (this.animation.complete) {
             return new DownhillState(this.assetManager, this.time);
         }
         this.animation.update(this.time);
-        return this;
+        return currentState;
     }
+}
 
-    do(action: PlayerCommand): IEntityState {
-        return this;
+class JumpingCommandManager implements ICommandManager {
+    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
+        return currentState;
     }
+}
 
-    updatePosition(position: Position): Position {
+class JumpingPositionManager implements IPositionManager {
+    private movement = new Position(0, JUMP_SPEED);
+
+    updatePosition(state: IEntityState, position: Position): Position {
         return position.add(this.movement);
     }
+}
 
-    collidedWith(otherEntity: IEntity): IEntityState {
+class JumpingCollisionManager implements ICollisionManager {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {}
+
+    collidedWith(state: IEntityState, otherEntity: IEntity): IEntityState {
         if (otherEntity.height > 100) {
             return new CrashState(this.assetManager, this.time);
         }
-        return this;
+        return state;
+    }
+}
+
+class JumpingState extends BaseState {
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        const stateAnimationManager = new JumpingStateAnimationManager(assetManager, time);
+        const commandManager = new JumpingCommandManager();
+        const positionManager = new JumpingPositionManager();
+        const collisionManager = new JumpingCollisionManager(assetManager, time);
+        super(stateAnimationManager, commandManager, positionManager, collisionManager, stateAnimationManager);
     }
 }
 
