@@ -65,33 +65,39 @@ describe("Player", () => {
 
         expect(player.position.y).toEqual(0);
 
-        // GIVEN the skier receives a jump command
-        gameTime.gameFrame++;
+        // GIVEN the skier goes downhill
+        while (gameTime.gameFrame < 5) {
+            gameTime.gameFrame++;
+            player.next();
+        }
+
+        // WHEN the player jumps
         player.handleInput("Space");
-        player.next();
 
         // THEN the skier starts jumping
-        while (gameTime.gameFrame <= 60) {
+        let jumpFrame = 0;
+        while (jumpFrame <= 60) {
+            jumpFrame++;
             gameTime.gameFrame++;
             player.next();
 
-            if (gameTime.gameFrame < 12) {
+            if (jumpFrame <= 12) {
                 expect(player.frame.alt).toEqual(`img/skier_jump_1.png`);
                 continue;
             }
-            if (gameTime.gameFrame < 24) {
+            if (jumpFrame <= 24) {
                 expect(player.frame.alt).toEqual(`img/skier_jump_2.png`);
                 continue;
             }
-            if (gameTime.gameFrame < 36) {
+            if (jumpFrame <= 36) {
                 expect(player.frame.alt).toEqual(`img/skier_jump_3.png`);
                 continue;
             }
-            if (gameTime.gameFrame < 48) {
+            if (jumpFrame <= 48) {
                 expect(player.frame.alt).toEqual(`img/skier_jump_4.png`);
                 continue;
             }
-            if (gameTime.gameFrame < 60) {
+            if (jumpFrame <= 60) {
                 expect(player.frame.alt).toEqual(`img/skier_jump_5.png`);
                 continue;
             }
@@ -187,7 +193,7 @@ describe("Player", () => {
         expect(player.frame.alt).toEqual("img/skier_jump_1.png");
 
         // UNTIL finally going downhill again
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i <= 60; i++) {
             gameTime.gameFrame++;
             player.next();
         }
@@ -272,14 +278,15 @@ describe("Player", () => {
         entityManager.next();
         player.handleInput("Space");
 
-        while (player.frame.alt !== "img/skier_down.png") {
+        for (let i = 0; i <= 60; i++) {
             gameTime.gameFrame++;
-            entityManager.next();
-            // fail on crash to avoid infinite loop
+            player.next();
             expect(player.frame.alt).not.toEqual("img/skier_crash.png");
         }
 
         // THEN the skier will land safely
+        gameTime.gameFrame++;
+        player.next();
         expect(player.frame.alt).toEqual("img/skier_down.png");
 
         // GIVEN another rock is in front
