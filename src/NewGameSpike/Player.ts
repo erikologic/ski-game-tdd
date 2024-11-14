@@ -252,9 +252,8 @@ class ContinuosMovementPositionManager implements IPositionManager {
     constructor(private time: GameTime, private movement: Position) {}
 
     updatePosition(state: IEntityState, position: Position): Position {
-        // speed should double every 60 seconds
         const gameSeconds = this.time.gameFrame / GameTime.FRAME_PER_SECOND;
-        const speed = Math.pow(2, gameSeconds / 60);
+        const speed = Math.pow(2, gameSeconds / 10) + 1;
         return position.add(this.movement.multiply(speed, speed));
     }
 }

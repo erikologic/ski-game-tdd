@@ -7,6 +7,7 @@ import { Canvas } from "./Canvas";
 import { EntityManager } from "./EntityManager";
 import { GameTime } from "./GameTime";
 import { Player, PlayerCommand } from "./Player";
+import { Position } from "./Position";
 import { Rhino } from "./Rhino";
 import { Tree } from "./Tree";
 
@@ -26,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const tree = new Tree(assetManager);
-    tree.position.y = 500;
+    tree.position.x = -100;
 
     const rhino = new Rhino(assetManager, gameTime);
     rhino.position.x = 100;
@@ -34,6 +35,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     canvas.camera.follow(player);
 
     const entityManager = new EntityManager([player, tree, rhino]);
+
+    for (let i = 0; i < 500; i++) {
+        const tree = new Tree(assetManager);
+        tree.position = new Position(-100, i * 100);
+        entityManager.entities.push(tree);
+    }
+
     async function next(time: number) {
         gameTime.update(time);
 
