@@ -74,22 +74,6 @@ class CrashAnimationManager implements IAnimationManager {
     }
 }
 
-class CrashCommandManager implements ICommandManager {
-    actions: Record<PlayerCommand, () => IEntityState | undefined>;
-
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.actions = {
-            jump: () => undefined,
-            goDown: () => undefined,
-            turnRight: () => new SideRightState(this.assetManager, this.time),
-            turnLeft: () => new SideLeftState(this.assetManager, this.time),
-        };
-    }
-    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
-        return this.actions[command]() || currentState;
-    }
-}
-
 class StoppedPositionManager implements IPositionManager {
     updatePosition(state: IEntityState, position: Position): Position {
         return position;
@@ -113,7 +97,12 @@ class SameNextStateManager implements INextStateManager {
 class CrashState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
         const animationManager = new CrashAnimationManager(assetManager);
-        const commandManager = new CrashCommandManager(assetManager, time);
+        const commandManager = new SimpleCommandManager({
+            jump: () => undefined,
+            goDown: () => undefined,
+            turnRight: () => new SideRightState(this.assetManager, this.time),
+            turnLeft: () => new SideLeftState(this.assetManager, this.time),
+        });
         const positionManager = new StoppedPositionManager();
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
@@ -129,26 +118,15 @@ class DownhillAnimationManager implements IAnimationManager {
     }
 }
 
-class DownhillCommandManager implements ICommandManager {
-    actions: Record<PlayerCommand, () => IEntityState | undefined>;
-
+class DownhillState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.actions = {
+        const animationManager = new DownhillAnimationManager(assetManager);
+        const commandManager = new SimpleCommandManager({
             jump: () => new JumpingState(this.assetManager, this.time),
             goDown: () => undefined,
             turnRight: () => new DownRightState(this.assetManager, this.time),
             turnLeft: () => new DownLeftState(this.assetManager, this.time),
-        };
-    }
-    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
-        return this.actions[command]() || currentState;
-    }
-}
-
-class DownhillState extends BaseState {
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        const animationManager = new DownhillAnimationManager(assetManager);
-        const commandManager = new DownhillCommandManager(assetManager, time);
+        });
         const positionManager = new ContinuosMovementPositionManager(new Position(0, DOWNHILL_SPEED));
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
@@ -164,26 +142,15 @@ class DownLeftAnimationManager implements IAnimationManager {
     }
 }
 
-class DownLeftCommandManager implements ICommandManager {
-    actions: Record<PlayerCommand, () => IEntityState | undefined>;
-
+class DownLeftState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.actions = {
+        const animationManager = new DownLeftAnimationManager(assetManager);
+        const commandManager = new SimpleCommandManager({
             jump: () => new JumpingState(this.assetManager, this.time),
             goDown: () => new DownhillState(this.assetManager, this.time),
             turnRight: () => new DownhillState(this.assetManager, this.time),
             turnLeft: () => new SideLeftState(this.assetManager, this.time),
-        };
-    }
-    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
-        return this.actions[command]() || currentState;
-    }
-}
-
-class DownLeftState extends BaseState {
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        const animationManager = new DownLeftAnimationManager(assetManager);
-        const commandManager = new DownLeftCommandManager(assetManager, time);
+        });
         const positionManager = new ContinuosMovementPositionManager(new Position(-DIAGONAL_SPEED, DIAGONAL_SPEED));
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
@@ -199,27 +166,15 @@ class SideLeftAnimationManager implements IAnimationManager {
     }
 }
 
-class SideLeftCommandManager implements ICommandManager {
-    actions: Record<PlayerCommand, () => IEntityState | undefined>;
-
+class SideLeftState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.actions = {
+        const animationManager = new SideLeftAnimationManager(assetManager);
+        const commandManager = new SimpleCommandManager({
             jump: () => new JumpingState(this.assetManager, this.time),
             goDown: () => new DownhillState(this.assetManager, this.time),
             turnRight: () => new DownLeftState(this.assetManager, this.time),
             turnLeft: () => new SideLeftState(this.assetManager, this.time),
-        };
-    }
-    do(currentState: IEntityState, command: PlayerCommand): IEntityState {
-        return this.actions[command]() || currentState;
-    }
-}
-
-class SideLeftState extends BaseState {
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        const animationManager = new SideLeftAnimationManager(assetManager);
-        const commandManager = new SideLeftCommandManager(assetManager, time);
-        // const positionManager = new SideLeftPositionManager();
+        });
         const positionManager = new MoveOncePositionManager(new Position(-SIDE_SPEED, 0));
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
@@ -270,17 +225,9 @@ class SideRightAnimationManager implements IAnimationManager {
     }
 }
 
-class SideRightCommandManager implements ICommandManager {
-    actions: Record<PlayerCommand, () => IEntityState | undefined>;
+class SimpleCommandManager implements ICommandManager {
+    constructor(private actions: Record<PlayerCommand, () => IEntityState | undefined>) {}
 
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
-        this.actions = {
-            jump: () => new JumpingState(this.assetManager, this.time),
-            goDown: () => new DownhillState(this.assetManager, this.time),
-            turnRight: () => new SideRightState(this.assetManager, this.time),
-            turnLeft: () => new DownRightState(this.assetManager, this.time),
-        };
-    }
     do(currentState: IEntityState, command: PlayerCommand): IEntityState {
         return this.actions[command]() || currentState;
     }
@@ -302,7 +249,12 @@ class MoveOncePositionManager implements IPositionManager {
 class SideRightState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
         const animationManager = new SideRightAnimationManager(assetManager);
-        const commandManager = new SideRightCommandManager(assetManager, time);
+        const commandManager = new SimpleCommandManager({
+            jump: () => new JumpingState(this.assetManager, this.time),
+            goDown: () => new DownhillState(this.assetManager, this.time),
+            turnRight: () => new SideRightState(this.assetManager, this.time),
+            turnLeft: () => new DownRightState(this.assetManager, this.time),
+        });
         const positionManager = new MoveOncePositionManager(new Position(SIDE_SPEED, 0));
         const collisionManager = new CollisionManager(assetManager, time);
         const nextStateManager = new SameNextStateManager();
@@ -335,7 +287,7 @@ class JumpingStateAnimationManager implements IAnimationManager, INextStateManag
     }
 }
 
-class JumpingCommandManager implements ICommandManager {
+class DoNothingCommandManager implements ICommandManager {
     do(currentState: IEntityState, command: PlayerCommand): IEntityState {
         return currentState;
     }
@@ -363,7 +315,7 @@ class JumpingCollisionManager implements ICollisionManager {
 class JumpingState extends BaseState {
     constructor(private assetManager: IAssetManager, private time: GameTime) {
         const stateAnimationManager = new JumpingStateAnimationManager(assetManager, time);
-        const commandManager = new JumpingCommandManager();
+        const commandManager = new DoNothingCommandManager();
         const positionManager = new ContinuosMovementPositionManager(new Position(0, JUMP_SPEED));
         const collisionManager = new JumpingCollisionManager(assetManager, time);
         super(stateAnimationManager, commandManager, positionManager, collisionManager, stateAnimationManager);
