@@ -3,6 +3,7 @@ import { IMAGES } from "./AssetManager";
 import { GameTime } from "./GameTime";
 import { Player } from "./Player";
 import { Tree } from "./Tree";
+import { Rock } from "./Rock";
 
 const createImage = (url: string) => {
     const image = new Image();
@@ -254,5 +255,45 @@ describe("Player", () => {
         player.handleInput("ArrowDown");
         entityManager.next();
         expect(player.frame.alt).toEqual("img/skier_down.png");
+    });
+
+    test("player can jump over a rock", () => {
+        const gameTime = new GameTime();
+        const player = new Player(assetManager, gameTime);
+
+        // GIVEN a rock is in front of the skier
+        const rock = new Rock(assetManager);
+        rock.position.y = 100;
+
+        const entityManager = new EntityManager([player, rock]);
+
+        // WHEN the skier jumps
+        gameTime.gameFrame++;
+        entityManager.next();
+        player.handleInput("Space");
+
+        while (player.frame.alt !== "img/skier_down.png") {
+            gameTime.gameFrame++;
+            entityManager.next();
+            // fail on crash to avoid infinite loop
+            expect(player.frame.alt).not.toEqual("img/skier_crash.png");
+        }
+
+        // THEN the skier will land safely
+        expect(player.frame.alt).toEqual("img/skier_down.png");
+
+        // GIVEN another rock is in front
+        const rock2 = new Rock(assetManager);
+        rock2.position.y = 300;
+        entityManager.entities.push(rock2);
+
+        // WHEN the skier goes downhill
+        while (player.frame.alt === "img/skier_down.png") {
+            gameTime.gameFrame++;
+            entityManager.next();
+        }
+
+        // THEN the skier will eventually crash on the rock
+        expect(player.frame.alt).toEqual("img/skier_crash.png");
     });
 });

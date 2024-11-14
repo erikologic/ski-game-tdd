@@ -4,6 +4,7 @@ import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
 import { Rect } from "./Rect";
+import { Rock } from "./Rock";
 
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
@@ -262,6 +263,9 @@ export class Player implements IEntity {
     }
 
     collidedWith(otherEntity: IEntity): void {
+        if (otherEntity instanceof Rock && this.state instanceof JumpingState) {
+            return;
+        }
         this.state = new CrashState(this.assetManager, this.time);
     }
 
