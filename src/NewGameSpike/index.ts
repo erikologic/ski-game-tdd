@@ -30,7 +30,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     tree.position.x = -100;
 
     const rhino = new Rhino(assetManager, gameTime);
-    rhino.position.x = 100;
+    rhino.position.y = -50;
+    rhino.chase(player);
 
     canvas.camera.follow(player);
 

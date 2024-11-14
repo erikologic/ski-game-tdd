@@ -4,6 +4,7 @@ import { Position } from "./Position";
 import { Animation } from "./Animation";
 import { GameTime } from "./GameTime";
 import { Rect } from "./Rect";
+import { StillFrameManager, IFrameManager } from "./StillFrameManager";
 
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
 
@@ -18,10 +19,6 @@ interface IEntityState {
     do(command: PlayerCommand): IEntityState;
     updatePosition(position: Position): Position;
     collidedWith(otherEntity: IEntity): IEntityState;
-}
-
-interface IFrameManager {
-    get frame(): HTMLImageElement;
 }
 
 interface ICommandManager {
@@ -64,10 +61,6 @@ class BaseState implements IEntityState {
     nextState(): IEntityState {
         return this.nextStateManager.next(this);
     }
-}
-
-class StillFrameManager implements IFrameManager {
-    constructor(public frame: HTMLImageElement) {}
 }
 
 class StoppedPositionManager implements IPositionManager {

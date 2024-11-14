@@ -13,7 +13,12 @@ export const IMAGES = [
     "img/skier_left.png",
     "img/skier_right.png",
     "img/skier_crash.png",
-    "img/rock_1.png"
+    "img/rock_1.png",
+    "img/rhino_default.png",
+    "img/rhino_eat_1.png",
+    "img/rhino_eat_2.png",
+    "img/rhino_eat_3.png",
+    "img/rhino_eat_4.png",
 ] as const;
 
 export interface IAssetManager {
