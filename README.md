@@ -2,8 +2,8 @@
 
 ## Description
 
-A simple browser based game where the player has to go down a ski slope avoiding obstacles. 
-Built it to learn browser Canvas and TDD'ing videogames.
+A simple browser based game where the player has to go down a ski slope avoiding obstacles.  
+I have built it mainly to learn browser Canvas and TDD'ing videogames.
 
 ## How to play
 
