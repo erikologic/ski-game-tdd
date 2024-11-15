@@ -31,12 +31,11 @@ It should be easy to expand features by adding a new test first.
 I was curious to learn about HTML Canvas and TDD a game in that environment.  
 I think overall it is a success.  
 
-There is a unit test that checks the player capabilities from the outside, without necessarily focusing on the implementation details.
-That test allowed me to support some refactoring until I came up with this State pattern approach, which I think is very interesting because:  
+I focused much on leveraging that TDD approach working out a Player code that is easy to read and extend, because:
 
 - each player state is a class,
 - each player state class well encapsulate behaviours for that particular state,
-- behaviours are shared among states
+- behaviours are reusable across states.
 
 I generally tried to follow this approach of testing behaviours from the outside, although in some case I tested small units of code to explain complex algorithms.
 
