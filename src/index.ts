@@ -1,4 +1,4 @@
-import "../../css/game.css";
+import "../css/game.css";
 
 import { AssetManager } from "./Utils/AssetManager";
 import { Canvas } from "./Engine/Canvas";
