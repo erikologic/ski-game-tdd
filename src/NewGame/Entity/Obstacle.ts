@@ -7,7 +7,7 @@ import { IEntity } from "./IEntity";
 const ROCK_IMAGES = ["img/rock_1.png", "img/rock_2.png"] as const;
 const TREE_IMAGES = ["img/tree_1.png", "img/tree_cluster.png"] as const;
 
-class Obstacle implements IEntity {
+export class Obstacle implements IEntity {
     position = new Position(0, 0);
 
     constructor(public frame: HTMLImageElement, public height: number) {}

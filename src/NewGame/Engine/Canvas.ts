@@ -1,5 +1,6 @@
 import { IEntity } from "../Entity/IEntity";
 import { Position } from "../Utils/Position";
+import { Rect } from "../Utils/Rect";
 import { Camera } from "./Camera";
 
 export class Canvas {
@@ -23,8 +24,7 @@ export class Canvas {
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
         this.centre = new Position(this.width / 2, this.heigth / 2);
-
-        this.camera = new Camera();
+        this.camera = new Camera(new Rect(this.centre, { width: this.width, height: this.heigth }));
     }
 
     clear() {

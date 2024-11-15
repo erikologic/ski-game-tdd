@@ -29,8 +29,8 @@ export class Rect {
         const me = this.coordinates;
         const other = areaCovered.coordinates;
 
-        if (me.right < other.left || me.left > other.right) return false;
-        if (me.bottom < other.top || me.top > other.bottom) return false;
+        if (me.right <= other.left || me.left >= other.right) return false;
+        if (me.bottom <= other.top || me.top >= other.bottom) return false;
 
         return true;
     }
