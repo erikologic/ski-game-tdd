@@ -123,13 +123,13 @@ describe("Rhino", () => {
         expect(rhino.position.y).toEqual(rhinoEatPosition.y);
     });
 
-    test("chase player left", () => {
+    test.each(["left", "right"])("chase player %s", (chaseDirection) => {
         // GIVEN a player and a rhino
         const gameTime = new GameTime();
         const player = new Player(assetManager, gameTime);
         const rhino = new Rhino(assetManager, gameTime);
         rhino.chase(player);
-        rhino.position.x = 300;
+        rhino.position.x = chaseDirection === "left" ? 300 : -300;
         rhino.position.y = -1000;
         const entityManager = new EntityManager([player, rhino]);
 
@@ -145,19 +145,19 @@ describe("Rhino", () => {
             gameTime.gameFrame++;
             entityManager.next();
 
-            if (runLeftFrame < 12) {
-                expect(rhino.frame.alt).toEqual("img/rhino_run_left.png");
+            if (runLeftFrame <= 12) {
+                expect(rhino.frame.alt).toEqual(`img/rhino_run_${chaseDirection}.png`);
                 continue;
             }
-            if (runLeftFrame < 24) {
-                expect(rhino.frame.alt).toEqual("img/rhino_run_left_2.png");
+            if (runLeftFrame <= 24) {
+                expect(rhino.frame.alt).toEqual(`img/rhino_run_${chaseDirection}_2.png`);
                 continue;
             }
-            if (runLeftFrame < 36) {
-                expect(rhino.frame.alt).toEqual("img/rhino_run_left.png");
+            if (runLeftFrame <= 36) {
+                expect(rhino.frame.alt).toEqual(`img/rhino_run_${chaseDirection}.png`);
                 continue;
             }
-            expect(rhino.frame.alt).toEqual("img/rhino_run_left_2.png");
+            expect(rhino.frame.alt).toEqual(`img/rhino_run_${chaseDirection}_2.png`);
         }
 
         // AND will catch the player

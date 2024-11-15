@@ -91,17 +91,30 @@ class ChaseCollisionManager implements ICollisionManager {
 }
 
 class ChasePositionManager implements IPositionManager {
-    direction: "down" | "left" = "down";
+    direction: "down" | "left" | "right" = "down";
     constructor(private time: GameTime, private target: IEntity) {}
 
-    updatePosition(state: IRhinoState, position: Position): Position {
+    updatePosition(state: IRhinoState, lastPosition: Position): Position {
         const gameSeconds = this.time.gameFrame / GameTime.FRAME_PER_SECOND;
         const speed = Math.pow(4, gameSeconds / 10) + 1;
-        const nextPosition = position.moveTowards(this.target.position, speed * DOWNHILL_SPEED);
-        if (nextPosition.x < position.x) {
-            this.direction = "left";
-        }
+        const nextPosition = lastPosition.moveTowards(this.target.position, speed * DOWNHILL_SPEED);
+
+        this.updateDirection(nextPosition, lastPosition);
+
         return nextPosition;
+    }
+
+    private updateDirection(nextPosition: Position, lastPosition: Position) {
+        const deltaX = nextPosition.x - lastPosition.x;
+        if (deltaX < -0.1) {
+            this.direction = "left";
+            return;
+        }
+        if (deltaX > 0.1) {
+            this.direction = "right";
+            return;
+        }
+        this.direction = "down";
     }
 }
 
@@ -110,24 +123,57 @@ class ChaseStateManager implements INextStateManager {
         private chasePositionManager: ChasePositionManager,
         private assetManager: IAssetManager,
         private time: GameTime,
-        private target: IEntity
+        private target: IEntity,
+        private currentChaseDirection: "down" | "left" | "right"
     ) {}
 
     next(currentState: IRhinoState): IRhinoState {
-        if ((this.chasePositionManager.direction = "left")) {
+        if (this.chasePositionManager.direction === this.currentChaseDirection) {
+            return currentState;
+        }
+        if (this.chasePositionManager.direction === "left") {
             return new RhinoChaseLeftState(this.assetManager, this.time, this.target);
         }
+        if (this.chasePositionManager.direction === "right") {
+            return new RhinoChaseSideState(
+                this.assetManager,
+                this.time,
+                this.target,
+                this.chasePositionManager.direction
+            );
+        }
         return currentState;
+    }
+}
+
+class RhinoChaseSideState extends BaseState {
+    constructor(assetManager: IAssetManager, time: GameTime, target: IEntity, direction: "right" | "left") {
+        const collisionManager = new ChaseCollisionManager(assetManager, time);
+        const positionManager = new ChasePositionManager(time, target);
+        const chaseAnimationStateManager = new ChaseAnimationStateManager(
+            assetManager,
+            time,
+            target,
+            positionManager,
+            direction
+        );
+        super(chaseAnimationStateManager, positionManager, collisionManager, chaseAnimationStateManager);
     }
 }
 
 class ChaseAnimationStateManager implements IFrameManager, INextStateManager {
     animation: Animation;
 
-    constructor(private assetManager: IAssetManager, private time: GameTime) {
+    constructor(
+        private assetManager: IAssetManager,
+        private time: GameTime,
+        private target: IEntity,
+        private chasePositionManager: ChasePositionManager,
+        private currentChaseDirection: "right" | "left"
+    ) {
         this.animation = new Animation([
-            assetManager.images["img/rhino_run_left.png"],
-            assetManager.images["img/rhino_run_left_2.png"],
+            assetManager.images[`img/rhino_run_${currentChaseDirection}.png`],
+            assetManager.images[`img/rhino_run_${currentChaseDirection}_2.png`],
         ]);
     }
 
@@ -137,18 +183,35 @@ class ChaseAnimationStateManager implements IFrameManager, INextStateManager {
 
     next(currentState: IRhinoState): IRhinoState {
         this.animation.update(this.time);
-        // if (this.animation.complete) {
-        //     return new RhinoCelebrateState(this.assetManager, this.time);
-        // }
+        if (this.chasePositionManager.direction === this.currentChaseDirection) {
+            return currentState;
+        }
+        if (this.chasePositionManager.direction === "left") {
+            return new RhinoChaseLeftState(this.assetManager, this.time, this.target);
+        }
+        if (this.chasePositionManager.direction === "right") {
+            return new RhinoChaseSideState(
+                this.assetManager,
+                this.time,
+                this.target,
+                this.chasePositionManager.direction
+            );
+        }
         return currentState;
     }
 }
 
 class RhinoChaseLeftState extends BaseState {
     constructor(assetManager: IAssetManager, time: GameTime, target: IEntity) {
-        const chaseAnimationStateManager = new ChaseAnimationStateManager(assetManager, time);
         const collisionManager = new ChaseCollisionManager(assetManager, time);
         const positionManager = new ChasePositionManager(time, target);
+        const chaseAnimationStateManager = new ChaseAnimationStateManager(
+            assetManager,
+            time,
+            target,
+            positionManager,
+            "left"
+        );
         super(chaseAnimationStateManager, positionManager, collisionManager, chaseAnimationStateManager);
     }
 }
@@ -158,7 +221,7 @@ class RhinoChaseState extends BaseState {
         const frameManager = new StillFrameManager(assetManager.images["img/rhino_default.png"]);
         const collisionManager = new ChaseCollisionManager(assetManager, time);
         const positionManager = new ChasePositionManager(time, target);
-        const nextStateManager = new ChaseStateManager(positionManager, assetManager, time, target);
+        const nextStateManager = new ChaseStateManager(positionManager, assetManager, time, target, "down");
         super(frameManager, positionManager, collisionManager, nextStateManager);
     }
 }
