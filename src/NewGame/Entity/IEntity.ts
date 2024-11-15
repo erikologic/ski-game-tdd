@@ -1,5 +1,5 @@
-import { Position } from "./Position";
-import { Rect } from "./Rect";
+import { Position } from "../Utils/Position";
+import { Rect } from "../Utils/Rect";
 
 export interface IEntity {
     collidedWith(otherEntity: IEntity): void;

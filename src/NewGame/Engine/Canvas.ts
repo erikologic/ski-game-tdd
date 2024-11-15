@@ -1,6 +1,6 @@
-import { IEntity } from "./IEntity";
+import { IEntity } from "../Entity/IEntity";
+import { Position } from "../Utils/Position";
 import { Camera } from "./Camera";
-import { Position } from "./Position";
 
 export class Canvas {
     width: number;

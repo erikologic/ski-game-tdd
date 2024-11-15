@@ -1,11 +1,12 @@
-import { AssetManager } from "./AssetManager";
-import { Canvas } from "./Canvas";
-import { EntityManager } from "./EntityManager";
-import { GameTime } from "./GameTime";
-import { Player } from "./Player";
-import { Rhino } from "./Rhino";
-import { Tree } from "./Tree";
+import "../../css/game.css";
 
+import { AssetManager } from "./Utils/AssetManager";
+import { Canvas } from "./Engine/Canvas";
+import { GameTime } from "./Engine/GameTime";
+import { EntityManager } from "./Entity/EntityManager";
+import { Player } from "./Entity/Player";
+import { Rhino } from "./Entity/Rhino";
+import { Tree } from "./Entity/Tree";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const canvas = new Canvas();

@@ -1,4 +1,4 @@
-import { GameTime } from "./GameTime";
+import { GameTime } from "../Engine/GameTime";
 
 export class Animation {
     animationStartFrame?: number;

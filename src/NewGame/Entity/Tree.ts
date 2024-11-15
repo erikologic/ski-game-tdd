@@ -1,16 +1,16 @@
-import { IAssetManager } from "./AssetManager";
+import { IAssetManager } from "../Utils/AssetManager";
+import { Position } from "../Utils/Position";
+import { Rect } from "../Utils/Rect";
 import { IEntity } from "./IEntity";
-import { Position } from "./Position";
-import { Rect } from "./Rect";
 
-export class Rock implements IEntity {
+export class Tree implements IEntity {
     position: Position;
     frame: HTMLImageElement;
-    height = 100;
+    height = 200;
 
     constructor(assetManager: IAssetManager) {
         this.position = new Position(0, 0);
-        this.frame = assetManager.images["img/rock_1.png"];
+        this.frame = assetManager.images["img/tree_1.png"];
     }
 
     get areaCovered(): Rect {

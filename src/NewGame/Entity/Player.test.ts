@@ -1,10 +1,10 @@
 import { EntityManager } from "./EntityManager";
-import { IMAGES } from "./AssetManager";
-import { GameTime } from "./GameTime";
 import { Player } from "./Player";
 import { Tree } from "./Tree";
 import { Rock } from "./Rock";
 import { Rhino } from "./Rhino";
+import { GameTime } from "../Engine/GameTime";
+import { IMAGES } from "../Utils/AssetManager";
 
 const createImage = (url: string) => {
     const image = new Image();

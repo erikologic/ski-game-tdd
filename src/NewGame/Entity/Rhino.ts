@@ -1,10 +1,10 @@
-import { IAssetManager } from "./AssetManager";
-import { GameTime } from "./GameTime";
+import { GameTime } from "../Engine/GameTime";
+import { IAssetManager } from "../Utils/AssetManager";
+import { Position } from "../Utils/Position";
+import { Rect } from "../Utils/Rect";
 import { IEntity } from "./IEntity";
 import { Player } from "./Player";
-import { Position } from "./Position";
-import { Rect } from "./Rect";
-import { Animation } from "./Animation";
+import { Animation } from "../Animation/Animation";
 
 // TODO - move these to a shared location
 const DOWNHILL_SPEED = 4;

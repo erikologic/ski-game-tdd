@@ -1,5 +1,5 @@
+import { GameTime } from "../Engine/GameTime";
 import { Animation } from "./Animation";
-import { GameTime } from "./GameTime";
 
 const createImage = (name: string) => {
     const image = new Image();

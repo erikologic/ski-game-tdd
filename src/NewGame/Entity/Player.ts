@@ -1,9 +1,9 @@
+import { GameTime } from "../Engine/GameTime";
+import { IAssetManager } from "../Utils/AssetManager";
+import { Position } from "../Utils/Position";
+import { Rect } from "../Utils/Rect";
 import { IEntity } from "./IEntity";
-import { IAssetManager } from "./AssetManager";
-import { Position } from "./Position";
-import { Animation } from "./Animation";
-import { GameTime } from "./GameTime";
-import { Rect } from "./Rect";
+import { Animation } from "../Animation/Animation";
 import { Rhino } from "./Rhino";
 
 export type PlayerCommand = "jump" | "turnRight" | "turnLeft" | "goDown";
@@ -20,7 +20,6 @@ interface IFrameManager {
 class StillFrameManager implements IFrameManager {
     constructor(public frame: HTMLImageElement) {}
 }
-
 
 interface IEntityState {
     nextState(): IEntityState;
