@@ -5,10 +5,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 // Webpack Configuration
 const config = {
     devtool: 'inline-source-map',
-    entry: {
-        oldGame: "./src/OldGame/index.ts",
-        newGame: "./src/NewGame/index.ts",
-    },
+    entry: "./src/index.ts",
 
     output: {
         path: path.resolve(__dirname, "./dist"),
@@ -36,15 +33,8 @@ const config = {
     plugins: [
         new htmlWebpackPlugin({
             filename: "index.html",
-            title: "Ceros Ski",
+            title: "Ski Game",
             template: "src/index.html",
-            chunks: ["newGame"],
-        }),
-        new htmlWebpackPlugin({
-            filename: "oldGame.html",
-            title: "Ceros Ski new",
-            template: "src/index.html",
-            chunks: ["oldGame"],
         }),
         new CopyPlugin({
             patterns: [{ from: "img/*", to: "" }],
