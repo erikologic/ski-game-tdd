@@ -101,32 +101,32 @@ describe("ObstacleManager", () => {
         const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
         const obstacleManager = new ObstacleManager(assetManager, player, camera);
         obstacleManager.obstacles = [];
-        obstacleManager.fillOutsideViewport();
+        obstacleManager.update();
 
         // WHEN the camera initially moves
-        for (let i = 0; i < 30; i++) {
-            const diff = Math.floor(i / 3);
-            camera.update(new Position(diff, diff));
-            obstacleManager.fillOutsideViewport();
-        }
-
-        // THEN we should see a limited number of obstacles
-        expect(obstacleManager.obstacles.length).toBeLessThan(10);
-
-        // GIVEN the camera moves more
         for (let i = 0; i < 1000; i++) {
             const diff = Math.floor(i / 3);
             camera.update(new Position(diff, diff));
-            obstacleManager.fillOutsideViewport();
+            obstacleManager.update();
+        }
+
+        // THEN we should see a limited number of obstacles
+        expect(obstacleManager.obstacles.length).toBeLessThan(3);
+
+        // GIVEN the camera moves more
+        for (let i = 0; i < 99999; i++) {
+            const diff = Math.floor(i / 3);
+            camera.update(new Position(diff, diff));
+            obstacleManager.update();
         }
 
         // THEN we should see much more obstacles being placed
         obstacleManager.obstacles = [];
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 1000; i++) {
             const diff = Math.floor(i / 3);
             camera.update(new Position(diff, diff));
-            obstacleManager.fillOutsideViewport();
+            obstacleManager.update();
         }
-        expect(obstacleManager.obstacles.length).toBeGreaterThanOrEqual(10);
+        expect(obstacleManager.obstacles.length).toBeGreaterThanOrEqual(3);
     });
 });

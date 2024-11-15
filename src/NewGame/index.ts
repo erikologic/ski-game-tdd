@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function next(time: number) {
         obstacleManager.update();
         entityManager.entities = [player, rhino, ...obstacleManager.obstacles];
-        console.log(obstacleManager.obstacles.length);
         gameTime.update(time);
 
         entityManager.next();
