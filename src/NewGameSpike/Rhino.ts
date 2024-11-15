@@ -132,7 +132,12 @@ class ChaseStateManager implements INextStateManager {
             return currentState;
         }
         if (this.chasePositionManager.direction === "left") {
-            return new RhinoChaseLeftState(this.assetManager, this.time, this.target);
+            return new RhinoChaseSideState(
+                this.assetManager,
+                this.time,
+                this.target,
+                this.chasePositionManager.direction
+            );
         }
         if (this.chasePositionManager.direction === "right") {
             return new RhinoChaseSideState(
@@ -187,7 +192,12 @@ class ChaseAnimationStateManager implements IFrameManager, INextStateManager {
             return currentState;
         }
         if (this.chasePositionManager.direction === "left") {
-            return new RhinoChaseLeftState(this.assetManager, this.time, this.target);
+            return new RhinoChaseSideState(
+                this.assetManager,
+                this.time,
+                this.target,
+                this.chasePositionManager.direction
+            );
         }
         if (this.chasePositionManager.direction === "right") {
             return new RhinoChaseSideState(
@@ -197,22 +207,7 @@ class ChaseAnimationStateManager implements IFrameManager, INextStateManager {
                 this.chasePositionManager.direction
             );
         }
-        return currentState;
-    }
-}
-
-class RhinoChaseLeftState extends BaseState {
-    constructor(assetManager: IAssetManager, time: GameTime, target: IEntity) {
-        const collisionManager = new ChaseCollisionManager(assetManager, time);
-        const positionManager = new ChasePositionManager(time, target);
-        const chaseAnimationStateManager = new ChaseAnimationStateManager(
-            assetManager,
-            time,
-            target,
-            positionManager,
-            "left"
-        );
-        super(chaseAnimationStateManager, positionManager, collisionManager, chaseAnimationStateManager);
+        return new RhinoChaseState(this.assetManager, this.time, this.target);
     }
 }
 
