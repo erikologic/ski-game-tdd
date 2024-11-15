@@ -1,4 +1,3 @@
-import e from "express";
 import { IAssetManager } from "../Utils/AssetManager";
 import { Position } from "../Utils/Position";
 import { Rect } from "../Utils/Rect";

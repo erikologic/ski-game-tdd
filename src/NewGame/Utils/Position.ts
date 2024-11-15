@@ -1,4 +1,9 @@
 export class Position {
+    distanceTo(position: Position) {
+        const x = this.x - position.x;
+        const y = this.y - position.y;
+        return Math.sqrt(x * x + y * y);
+    }
     constructor(public x: number, public y: number) {}
 
     add(other: Position) {

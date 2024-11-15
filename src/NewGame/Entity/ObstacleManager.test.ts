@@ -18,36 +18,73 @@ const assetManager = {
         HTMLImageElement
     >,
 };
-
 class ObstacleManager {
-    constructor(private camera: Camera, private assetManager: IAssetManager) {}
+    obstacles: Obstacle[] = [];
+    constructor(private assetManager: IAssetManager) {}
 
-    placeRandomObstacle(): Obstacle {
-        const { height, width } = this.camera.area.size;
+    placeRandomObstacleOutsideViewport(camera: Camera): Obstacle {
+        const { height, width } = camera.area.size;
         const delta = height / 2;
-        const center = this.camera.position.add(new Position(0, delta));
+        const center = camera.position.add(new Position(0, delta));
 
         const placementArea = new Rect(center, { height, width: width + delta });
 
         let obstacle: Obstacle | undefined;
         while (!obstacle) {
-            const newObstacle = Rock.random(this.assetManager);
-            newObstacle.position = new Position(
-                Math.random() * placementArea.size.width,
-                Math.random() * placementArea.size.height
-            ).add(new Position(placementArea.coordinates.left, placementArea.coordinates.top));
-            if (newObstacle.areaCovered.overlaps(this.camera.area)) {
+            const newObstacle = this.createRandomObstacle(placementArea);
+
+            if (newObstacle.areaCovered.overlaps(camera.area)) {
                 continue;
             }
             obstacle = newObstacle;
         }
         return obstacle;
     }
+
+    fill(placementArea: Rect) {
+        const attempts = 999;
+        for (let i = 0; i < attempts; i++) {
+            const newObstacle = this.createRandomObstacle(placementArea);
+            if (this.obstacles.some((obstacle) => obstacle.position.distanceTo(newObstacle.position) < 50)) {
+                continue;
+            }
+            this.obstacles.push(newObstacle);
+        }
+    }
+
+    private createRandomObstacle(placementArea: Rect) {
+        const newObstacle = Rock.random(this.assetManager);
+        newObstacle.position = new Position(
+            Math.random() * placementArea.size.width,
+            Math.random() * placementArea.size.height
+        ).add(new Position(placementArea.coordinates.left, placementArea.coordinates.top));
+        return newObstacle;
+    }
 }
 
 describe("ObstacleManager", () => {
-    test("new obstacles are placed just outside the camera viewport, south of the center", () => {
+    test("initially, we fill with new obstacles placed not so close from each other", () => {
+        const obstacleManager = new ObstacleManager(assetManager);
+        const placementArea = new Rect(new Position(0, 0), { width: 100, height: 100 });
+
+        obstacleManager.fill(placementArea);
+
+        for (let i = 0; i < obstacleManager.obstacles.length; i++) {
+            const obstacle = obstacleManager.obstacles[i];
+            for (let j = i + 1; j < obstacleManager.obstacles.length; j++) {
+                const otherObstacle = obstacleManager.obstacles[j];
+                const distance = obstacle.position.distanceTo(otherObstacle.position);
+                expect(distance).toBeGreaterThan(50);
+            }
+        }
+    });
+
+    test("while playing, new obstacles are placed just outside the camera viewport, south of the centre", () => {
         /**
+         * C = camera viewport
+         * O = obstacle placement area
+         * X = centre of the camera
+         *
          *   C C C C C
          * O C C X C C O
          * O C C C C C O
@@ -55,8 +92,8 @@ describe("ObstacleManager", () => {
          */
         const centre = new Position(0, 0);
         const camera = new Camera(new Rect(centre, { width: 100, height: 100 }));
-        const obstacleManager = new ObstacleManager(camera, assetManager);
-        const obstacle = obstacleManager.placeRandomObstacle();
+        const obstacleManager = new ObstacleManager(assetManager);
+        const obstacle = obstacleManager.placeRandomObstacleOutsideViewport(camera);
 
         for (let i = 0; i < 999; i++) {
             // below the camera centre
