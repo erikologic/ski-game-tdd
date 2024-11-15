@@ -1,8 +1,11 @@
 import { Camera } from "../Engine/Camera";
+import { GameTime } from "../Engine/GameTime";
 import { IAssetManager, IMAGES } from "../Utils/AssetManager";
 import { Position } from "../Utils/Position";
 import { Rect } from "../Utils/Rect";
+import { IEntity } from "./IEntity";
 import { Obstacle, Rock } from "./Obstacle";
+import { Player } from "./Player";
 
 const createImage = (url: string) => {
     const image = new Image();
@@ -20,12 +23,12 @@ const assetManager = {
 };
 class ObstacleManager {
     obstacles: Obstacle[] = [];
-    constructor(private assetManager: IAssetManager) {}
+    constructor(private assetManager: IAssetManager, private player: IEntity, private camera: Camera) {}
 
-    placeRandomObstacleOutsideViewport(camera: Camera): Obstacle {
-        const { height, width } = camera.area.size;
+    fillOutsideViewport(): Obstacle {
+        const { height, width } = this.camera.area.size;
         const delta = height / 2;
-        const center = camera.position.add(new Position(0, delta));
+        const center = this.camera.position.add(new Position(0, delta));
 
         const placementArea = new Rect(center, { height, width: width + delta });
 
@@ -33,7 +36,7 @@ class ObstacleManager {
         while (!obstacle) {
             const newObstacle = this.createRandomObstacle(placementArea);
 
-            if (newObstacle.areaCovered.overlaps(camera.area)) {
+            if (!newObstacle || newObstacle.areaCovered.overlaps(this.camera.area)) {
                 continue;
             }
             obstacle = newObstacle;
@@ -41,45 +44,79 @@ class ObstacleManager {
         return obstacle;
     }
 
-    fill(placementArea: Rect) {
+    fillInitial() {
+        const { height: oldHeight, width } = this.camera.area.size;
+        const newHeight = oldHeight / 2;
+        const newCentre = this.player.position.add(new Position(0, newHeight / 2));
+        const placementArea = new Rect(newCentre, {
+            width,
+            height: newHeight,
+        });
+        for (let i = 0; i < 20; i++) {
+            const newObstacle = this.createRandomObstacle(placementArea);
+            if (newObstacle) {
+                this.obstacles.push(newObstacle);
+            }
+        }
+    }
+
+    private createRandomObstacle(placementArea: Rect): Obstacle | void {
         const attempts = 999;
         for (let i = 0; i < attempts; i++) {
-            const newObstacle = this.createRandomObstacle(placementArea);
+            const newObstacle = Rock.random(this.assetManager);
+            newObstacle.position = new Position(
+                Math.random() * placementArea.size.width,
+                Math.random() * placementArea.size.height
+            ).add(new Position(placementArea.coordinates.left, placementArea.coordinates.top));
             if (this.obstacles.some((obstacle) => obstacle.position.distanceTo(newObstacle.position) < 50)) {
                 continue;
             }
-            this.obstacles.push(newObstacle);
+            return newObstacle;
         }
-    }
-
-    private createRandomObstacle(placementArea: Rect) {
-        const newObstacle = Rock.random(this.assetManager);
-        newObstacle.position = new Position(
-            Math.random() * placementArea.size.width,
-            Math.random() * placementArea.size.height
-        ).add(new Position(placementArea.coordinates.left, placementArea.coordinates.top));
-        return newObstacle;
     }
 }
 
+const repeatToDealWithRandomness = Array(50).fill(null);
+
 describe("ObstacleManager", () => {
-    test("initially, we fill with new obstacles placed not so close from each other", () => {
-        const obstacleManager = new ObstacleManager(assetManager);
-        const placementArea = new Rect(new Position(0, 0), { width: 100, height: 100 });
+    describe("initially", () => {
+        test.each(repeatToDealWithRandomness)("we fill with new obstacles placed not so close from each other", () => {
+            const gameTime = new GameTime();
+            const player = new Player(assetManager, gameTime);
+            const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
+            const obstacleManager = new ObstacleManager(assetManager, player, camera);
+            obstacleManager.fillInitial();
 
-        obstacleManager.fill(placementArea);
-
-        for (let i = 0; i < obstacleManager.obstacles.length; i++) {
-            const obstacle = obstacleManager.obstacles[i];
-            for (let j = i + 1; j < obstacleManager.obstacles.length; j++) {
-                const otherObstacle = obstacleManager.obstacles[j];
-                const distance = obstacle.position.distanceTo(otherObstacle.position);
-                expect(distance).toBeGreaterThan(50);
+            for (let i = 0; i < obstacleManager.obstacles.length; i++) {
+                const obstacle = obstacleManager.obstacles[i];
+                for (let j = i + 1; j < obstacleManager.obstacles.length; j++) {
+                    const otherObstacle = obstacleManager.obstacles[j];
+                    const distance = obstacle.position.distanceTo(otherObstacle.position);
+                    expect(distance).toBeGreaterThan(50);
+                }
             }
-        }
+        });
+
+        test.each(repeatToDealWithRandomness)("we fill obstacles only inside the camera viewport, south of player", () => {
+            const gameTime = new GameTime();
+            const player = new Player(assetManager, gameTime);
+            const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
+
+            const obstacleManager = new ObstacleManager(assetManager, player, camera);
+            obstacleManager.fillInitial();
+
+            expect(obstacleManager.obstacles.length).toBeGreaterThan(0);
+            expect(obstacleManager.obstacles.length).toBeLessThanOrEqual(20);
+            for (const obstacle of obstacleManager.obstacles) {
+                expect(obstacle.position.y).toBeGreaterThanOrEqual(player.position.y);
+                expect(obstacle.position.y).toBeLessThanOrEqual(camera.area.coordinates.bottom);
+                expect(obstacle.position.x).toBeGreaterThan(camera.area.coordinates.left);
+                expect(obstacle.position.x).toBeLessThan(camera.area.coordinates.right);
+            }
+        });
     });
 
-    test("while playing, new obstacles are placed just outside the camera viewport, south of the centre", () => {
+    test.each(repeatToDealWithRandomness)("while playing, new obstacles are placed just outside the camera viewport, south of the centre", () => {
         /**
          * C = camera viewport
          * O = obstacle placement area
@@ -90,12 +127,13 @@ describe("ObstacleManager", () => {
          * O C C C C C O
          * O O O O O O O
          */
-        const centre = new Position(0, 0);
-        const camera = new Camera(new Rect(centre, { width: 100, height: 100 }));
-        const obstacleManager = new ObstacleManager(assetManager);
-        const obstacle = obstacleManager.placeRandomObstacleOutsideViewport(camera);
+        const gameTime = new GameTime();
+        const player = new Player(assetManager, gameTime);
+        const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
+        const obstacleManager = new ObstacleManager(assetManager, player, camera);
+        obstacleManager.fillOutsideViewport();
 
-        for (let i = 0; i < 999; i++) {
+        for (const obstacle of obstacleManager.obstacles) {
             // below the camera centre
             expect(obstacle.position.y).toBeGreaterThanOrEqual(camera.position.y);
             // just south the camera viewport
