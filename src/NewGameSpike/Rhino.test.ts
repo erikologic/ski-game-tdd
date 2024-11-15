@@ -123,7 +123,48 @@ describe("Rhino", () => {
         expect(rhino.position.y).toEqual(rhinoEatPosition.y);
     });
 
-    test("chase player left and right", () => {
-        fail("not implemented");
+    test("chase player left", () => {
+        // GIVEN a player and a rhino
+        const gameTime = new GameTime();
+        const player = new Player(assetManager, gameTime);
+        const rhino = new Rhino(assetManager, gameTime);
+        rhino.chase(player);
+        rhino.position.x = 300;
+        rhino.position.y = -1000;
+        const entityManager = new EntityManager([player, rhino]);
+
+        // THEN the rhino will chase the player left
+        let runLeftFrame = -1;
+        gameTime.gameFrame++;
+        entityManager.next();
+        expect(rhino.position.x).toBeLessThan(300);
+        expect(rhino.position.y).toBeGreaterThan(-1000);
+
+        while (runLeftFrame < 48) {
+            runLeftFrame++;
+            gameTime.gameFrame++;
+            entityManager.next();
+
+            if (runLeftFrame <= 12) {
+                expect(rhino.frame.alt).toEqual("img/rhino_run_left.png");
+                continue;
+            }
+            if (runLeftFrame <= 24) {
+                expect(rhino.frame.alt).toEqual("img/rhino_run_left_2.png");
+                continue;
+            }
+            if (runLeftFrame <= 36) {
+                expect(rhino.frame.alt).toEqual("img/rhino_run_left.png");
+                continue;
+            }
+            expect(rhino.frame.alt).toEqual("img/rhino_run_left_2.png");
+        }
+
+        // AND will catch the player
+        for (let i = 0; i < 999; i++) {
+            gameTime.gameFrame++;
+            entityManager.next();
+        }
+        expect(rhino.frame.alt).toEqual("img/rhino_celebrate_1.png");
     });
 });

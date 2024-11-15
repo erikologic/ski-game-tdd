@@ -90,21 +90,21 @@ class ChaseCollisionManager implements ICollisionManager {
     }
 }
 
-class ContinuosMovementPositionManager implements IPositionManager {
-    constructor(private time: GameTime, private movement: Position) {}
+class ChasePositionManager implements IPositionManager {
+    constructor(private time: GameTime, private target: IEntity) {}
 
     updatePosition(state: IRhinoState, position: Position): Position {
         const gameSeconds = this.time.gameFrame / GameTime.FRAME_PER_SECOND;
         const speed = Math.pow(4, gameSeconds / 10) + 1;
-        return position.add(this.movement.multiply(speed, speed));
+        return position.moveTowards(this.target.position, speed * DOWNHILL_SPEED);
     }
 }
 
 class RhinoChaseState extends BaseState {
-    constructor(assetManager: IAssetManager, time: GameTime) {
+    constructor(assetManager: IAssetManager, time: GameTime, target: IEntity) {
         const frameManager = new StillFrameManager(assetManager.images["img/rhino_default.png"]);
         const collisionManager = new ChaseCollisionManager(assetManager, time);
-        const positionManager = new ContinuosMovementPositionManager(time, new Position(0, DOWNHILL_SPEED));
+        const positionManager = new ChasePositionManager(time, target);
         const nextStateManager = new SameNextStateManager();
         super(frameManager, positionManager, collisionManager, nextStateManager);
     }
@@ -217,6 +217,6 @@ export class Rhino implements IEntity {
     }
 
     chase(entity: IEntity) {
-        this.state = new RhinoChaseState(this.assetManager, this.time);
+        this.state = new RhinoChaseState(this.assetManager, this.time, entity);
     }
 }
