@@ -75,7 +75,7 @@ export class ObstacleManager {
 
     private createRandomObstacle(placementArea: Rect, attempts: number, exclusionArea?: Rect): Obstacle | void {
         for (let i = 0; i < attempts; i++) {
-            const newObstacle = Rock.random(this.assetManager);
+            const newObstacle = Obstacle.random(this.assetManager);
             newObstacle.position = new Position(
                 Math.random() * placementArea.size.width,
                 Math.random() * placementArea.size.height

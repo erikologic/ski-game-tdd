@@ -1,4 +1,6 @@
 export const IMAGES = [
+    "img/rock_1.png",
+    "img/rock_2.png",
     "img/tree_1.png",
     "img/tree_cluster.png",
     "img/skier_down.png",
@@ -14,8 +16,6 @@ export const IMAGES = [
     "img/skier_left.png",
     "img/skier_right.png",
     "img/skier_crash.png",
-    "img/rock_1.png",
-    "img/rock_2.png",
     "img/rhino_default.png",
     "img/rhino_eat_1.png",
     "img/rhino_eat_2.png",

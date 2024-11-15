@@ -18,6 +18,15 @@ export class Obstacle implements IEntity {
     collidedWith(otherEntity: IEntity): void {}
 
     next() {}
+
+    static random(assetManager: IAssetManager): Obstacle {
+        const isRock = Math.round(Math.random());
+        if (isRock) {
+            return Rock.random(assetManager);
+        } else {
+            return Tree.random(assetManager);
+        }
+    }
 }
 
 export class Rock extends Obstacle {

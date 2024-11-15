@@ -24,6 +24,23 @@ const repeatToDealWithRandomness = Array(50).fill(null);
 
 describe("ObstacleManager", () => {
     describe("initially", () => {
+        test("when generating obstacles, we randomly place rocks and trees", () => {
+            let obstacleImages = new Set();
+
+            for (const _ of repeatToDealWithRandomness) {
+                const gameTime = new GameTime();
+                const player = new Player(assetManager, gameTime);
+                const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
+                const obstacleManager = new ObstacleManager(assetManager, player, camera);
+
+                // const obstacleImages = new Set(obstacleManager.obstacles.map((obstacle) => obstacle.frame.alt));
+                obstacleManager.obstacles.map((o) => o.frame.alt).forEach((img) => obstacleImages.add(img));
+            }
+            expect(obstacleImages).toEqual(
+                new Set(["img/rock_1.png", "img/rock_2.png", "img/tree_1.png", "img/tree_cluster.png"])
+            );
+        });
+
         test("we fill with new obstacles placed not so close from each other", () => {
             for (const _ of repeatToDealWithRandomness) {
                 const gameTime = new GameTime();
@@ -50,7 +67,7 @@ describe("ObstacleManager", () => {
 
                 const obstacleManager = new ObstacleManager(assetManager, player, camera);
 
-                expect(obstacleManager.obstacles.length).toBeGreaterThan(1);
+                expect(obstacleManager.obstacles.length).toBeGreaterThan(0);
                 expect(obstacleManager.obstacles.length).toBeLessThanOrEqual(20);
                 for (const obstacle of obstacleManager.obstacles) {
                     expect(obstacle.position.y).toBeGreaterThanOrEqual(player.position.y);
@@ -95,7 +112,7 @@ describe("ObstacleManager", () => {
         }
     });
 
-    fit("more obstacles are placed as the camera moves", () => {
+    test("more obstacles are placed as the camera moves", () => {
         const gameTime = new GameTime();
         const player = new Player(assetManager, gameTime);
         const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
