@@ -14,7 +14,7 @@ describe("Camera", () => {
         entity.position = new Position(50, 50);
 
         // THEN the camera follows the entity
-        camera.next();
+        camera.update();
         expect(camera.position).toEqual(entity.position);
 
         // AND the camera area is updated

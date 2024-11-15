@@ -7,6 +7,7 @@ import { EntityManager } from "./Entity/EntityManager";
 import { Player } from "./Entity/Player";
 import { Rhino } from "./Entity/Rhino";
 import { Tree } from "./Entity/Obstacle";
+import { ObstacleManager } from "./Entity/ObstacleManager";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const canvas = new Canvas();
@@ -21,23 +22,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    const tree = Tree.random(assetManager);
-    tree.position.x = -100;
-
     const rhino = new Rhino(assetManager, gameTime);
     rhino.position.y = -200;
-    rhino.chase(player);
+    // rhino.chase(player);
 
+    const obstacleManager = new ObstacleManager(assetManager, player, canvas.camera);
     canvas.camera.follow(player);
 
-    const entityManager = new EntityManager([player, tree, rhino]);
+    const entityManager = new EntityManager([player, rhino]);
 
     async function next(time: number) {
+        obstacleManager.update();
+        entityManager.entities = [player, rhino, ...obstacleManager.obstacles];
+        console.log(obstacleManager.obstacles.length);
         gameTime.update(time);
 
         entityManager.next();
 
-        canvas.camera.next();
+        canvas.camera.update();
         canvas.clear();
         entityManager.entities.forEach((entity) => canvas.drawEntity(entity));
 

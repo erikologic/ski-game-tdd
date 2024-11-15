@@ -24,4 +24,8 @@ export class Position {
         const y = Math.sin(angle) * speed;
         return new Position(this.x + x, this.y + y);
     }
+
+    equals(other: Position) {
+        return this.x === other.x && this.y === other.y;
+    }
 }
