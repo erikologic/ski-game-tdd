@@ -91,12 +91,65 @@ class ChaseCollisionManager implements ICollisionManager {
 }
 
 class ChasePositionManager implements IPositionManager {
+    direction: "down" | "left" = "down";
     constructor(private time: GameTime, private target: IEntity) {}
 
     updatePosition(state: IRhinoState, position: Position): Position {
         const gameSeconds = this.time.gameFrame / GameTime.FRAME_PER_SECOND;
         const speed = Math.pow(4, gameSeconds / 10) + 1;
-        return position.moveTowards(this.target.position, speed * DOWNHILL_SPEED);
+        const nextPosition = position.moveTowards(this.target.position, speed * DOWNHILL_SPEED);
+        if (nextPosition.x < position.x) {
+            this.direction = "left";
+        }
+        return nextPosition;
+    }
+}
+
+class ChaseStateManager implements INextStateManager {
+    constructor(
+        private chasePositionManager: ChasePositionManager,
+        private assetManager: IAssetManager,
+        private time: GameTime,
+        private target: IEntity
+    ) {}
+
+    next(currentState: IRhinoState): IRhinoState {
+        if ((this.chasePositionManager.direction = "left")) {
+            return new RhinoChaseLeftState(this.assetManager, this.time, this.target);
+        }
+        return currentState;
+    }
+}
+
+class ChaseAnimationStateManager implements IFrameManager, INextStateManager {
+    animation: Animation;
+
+    constructor(private assetManager: IAssetManager, private time: GameTime) {
+        this.animation = new Animation([
+            assetManager.images["img/rhino_run_left.png"],
+            assetManager.images["img/rhino_run_left_2.png"],
+        ]);
+    }
+
+    get frame(): HTMLImageElement {
+        return this.animation.frame;
+    }
+
+    next(currentState: IRhinoState): IRhinoState {
+        this.animation.update(this.time);
+        // if (this.animation.complete) {
+        //     return new RhinoCelebrateState(this.assetManager, this.time);
+        // }
+        return currentState;
+    }
+}
+
+class RhinoChaseLeftState extends BaseState {
+    constructor(assetManager: IAssetManager, time: GameTime, target: IEntity) {
+        const chaseAnimationStateManager = new ChaseAnimationStateManager(assetManager, time);
+        const collisionManager = new ChaseCollisionManager(assetManager, time);
+        const positionManager = new ChasePositionManager(time, target);
+        super(chaseAnimationStateManager, positionManager, collisionManager, chaseAnimationStateManager);
     }
 }
 
@@ -105,7 +158,7 @@ class RhinoChaseState extends BaseState {
         const frameManager = new StillFrameManager(assetManager.images["img/rhino_default.png"]);
         const collisionManager = new ChaseCollisionManager(assetManager, time);
         const positionManager = new ChasePositionManager(time, target);
-        const nextStateManager = new SameNextStateManager();
+        const nextStateManager = new ChaseStateManager(positionManager, assetManager, time, target);
         super(frameManager, positionManager, collisionManager, nextStateManager);
     }
 }

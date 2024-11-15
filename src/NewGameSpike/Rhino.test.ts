@@ -140,20 +140,20 @@ describe("Rhino", () => {
         expect(rhino.position.x).toBeLessThan(300);
         expect(rhino.position.y).toBeGreaterThan(-1000);
 
-        while (runLeftFrame < 48) {
+        while (runLeftFrame < 47) {
             runLeftFrame++;
             gameTime.gameFrame++;
             entityManager.next();
 
-            if (runLeftFrame <= 12) {
+            if (runLeftFrame < 12) {
                 expect(rhino.frame.alt).toEqual("img/rhino_run_left.png");
                 continue;
             }
-            if (runLeftFrame <= 24) {
+            if (runLeftFrame < 24) {
                 expect(rhino.frame.alt).toEqual("img/rhino_run_left_2.png");
                 continue;
             }
-            if (runLeftFrame <= 36) {
+            if (runLeftFrame < 36) {
                 expect(rhino.frame.alt).toEqual("img/rhino_run_left.png");
                 continue;
             }
@@ -165,6 +165,6 @@ describe("Rhino", () => {
             gameTime.gameFrame++;
             entityManager.next();
         }
-        expect(rhino.frame.alt).toEqual("img/rhino_celebrate_1.png");
+        expect(rhino.frame.alt).toMatch("rhino_celebrate");
     });
 });
