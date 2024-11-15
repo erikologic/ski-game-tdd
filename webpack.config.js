@@ -38,13 +38,13 @@ const config = {
             filename: "index.html",
             title: "Ceros Ski",
             template: "src/index.html",
-            chunks: ["oldGame"],
+            chunks: ["newGame"],
         }),
         new htmlWebpackPlugin({
-            filename: "newGame.html",
+            filename: "oldGame.html",
             title: "Ceros Ski new",
             template: "src/index.html",
-            chunks: ["newGame"],
+            chunks: ["oldGame"],
         }),
         new CopyPlugin({
             patterns: [{ from: "img/*", to: "" }],
