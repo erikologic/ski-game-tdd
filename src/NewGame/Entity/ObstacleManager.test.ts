@@ -33,7 +33,6 @@ describe("ObstacleManager", () => {
                 const camera = new Camera(new Rect(new Position(0, 0), { width: 100, height: 100 }));
                 const obstacleManager = new ObstacleManager(assetManager, player, camera);
 
-                // const obstacleImages = new Set(obstacleManager.obstacles.map((obstacle) => obstacle.frame.alt));
                 obstacleManager.obstacles.map((o) => o.frame.alt).forEach((img) => obstacleImages.add(img));
             }
             expect(obstacleImages).toEqual(

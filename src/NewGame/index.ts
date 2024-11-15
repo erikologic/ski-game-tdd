@@ -7,6 +7,7 @@ import { EntityManager } from "./Entity/EntityManager";
 import { Player } from "./Entity/Player";
 import { Rhino } from "./Entity/Rhino";
 import { ObstacleManager } from "./Entity/ObstacleManager";
+import { Position } from "./Utils/Position";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const canvas = new Canvas();
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const rhino = new Rhino(assetManager, gameTime);
-    rhino.position.y = -200;
+    rhino.position = new Position(-1000, -1000);
     rhino.chase(player);
 
     const obstacleManager = new ObstacleManager(assetManager, player, canvas.camera);
