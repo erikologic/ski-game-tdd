@@ -1,10 +1,9 @@
 import { EntityManager } from "./EntityManager";
 import { Player } from "./Player";
-import { Tree } from "./Tree";
-import { Rock } from "./Rock";
 import { Rhino } from "./Rhino";
 import { GameTime } from "../Engine/GameTime";
 import { IMAGES } from "../Utils/AssetManager";
+import { Rock, Tree } from "./Obstacle";
 
 const createImage = (url: string) => {
     const image = new Image();
@@ -224,7 +223,7 @@ describe("Player", () => {
         const player = new Player(assetManager, gameTime);
 
         // GIVEN a tree in front of the skier
-        const tree = new Tree(assetManager);
+        const tree = Tree.random(assetManager);
         tree.position.y = 7;
 
         const entityManager = new EntityManager([player, tree]);
@@ -286,7 +285,7 @@ describe("Player", () => {
         const player = new Player(assetManager, gameTime);
 
         // GIVEN a rock is in front of the skier
-        const rock = new Rock(assetManager);
+        const rock = Rock.random(assetManager);
         rock.position.y = 100;
 
         const entityManager = new EntityManager([player, rock]);
@@ -308,7 +307,7 @@ describe("Player", () => {
         expect(player.frame!.alt).toEqual("img/skier_down.png");
 
         // GIVEN another rock is in front
-        const rock2 = new Rock(assetManager);
+        const rock2 = Rock.random(assetManager);
         rock2.position.y = 500;
         entityManager.entities.push(rock2);
 

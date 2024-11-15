@@ -6,7 +6,7 @@ import { GameTime } from "./Engine/GameTime";
 import { EntityManager } from "./Entity/EntityManager";
 import { Player } from "./Entity/Player";
 import { Rhino } from "./Entity/Rhino";
-import { Tree } from "./Entity/Tree";
+import { Tree } from "./Entity/Obstacle";
 
 document.addEventListener("DOMContentLoaded", async () => {
     const canvas = new Canvas();
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    const tree = new Tree(assetManager);
+    const tree = Tree.random(assetManager);
     tree.position.x = -100;
 
     const rhino = new Rhino(assetManager, gameTime);
